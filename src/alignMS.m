@@ -77,8 +77,9 @@ function mzXMLFiles = convertRaw(rawFiles)
       system('cd C:\ProteoWizard\');
       system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' [userpath '/mzXML']]);
    end
-   fileStruct = dir('*.mzXML');
-   
+   cd([userpath '\mzXML']);
+   mzXMLFiles = dir('*.mzXML');
+   cd(userpath);
 end
 %---------------------------------
 function peakList = retrievePeaks(files)
