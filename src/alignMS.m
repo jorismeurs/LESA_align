@@ -2,10 +2,12 @@
 function alignMS() 
 
 [FileName, PathName] = uigetfile('.raw',...
-'MultiSelect','on')
-if isequal(FileName, 0)
+'MultiSelect','on');
+if isequal(FileName, 0);
    return
 end 
+fileLocation = fullfile(PathName, FileName);
+mzxmlFiles = convertRaw(fileLocation);
 
 end
 
