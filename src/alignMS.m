@@ -1,5 +1,7 @@
 % Code here
-function alignMS() 
+function alignMS(parameters) 
+
+validateInput(parameters);
 
 [FileName, PathName] = uigetfile('.raw',...
 'MultiSelect','on');
@@ -9,10 +11,14 @@ end
 fileLocation = fullfile(PathName, FileName);
 mzxmlFiles = convertRaw(fileLocation);
 for j = 1:length(mzxmlFiles)
-    peakData = retrieve 
+    peakData{j} = retrievePeaks(mzxmlFiles{j});
 end
 
 
+
+end
+
+function validateInput(params);
 
 end
 
