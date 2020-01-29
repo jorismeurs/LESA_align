@@ -33,7 +33,13 @@ end
 % Filter variables below threshold abundance and impute remaining missing values
 
 % Export matrix to an Excel file
+if isempty(parameters.name)
 
+else
+   exportName = parameters.name;
+end
+xlswrite([exportName '.xlsx'],intensityMatrix,'Sheet1',B2);
+xlswrite
 
 end
 
