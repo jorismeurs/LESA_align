@@ -8,6 +8,11 @@ if isequal(FileName, 0);
 end 
 fileLocation = fullfile(PathName, FileName);
 mzxmlFiles = convertRaw(fileLocation);
+for j = 1:length(mzxmlFiles)
+    peakData = retrieve 
+end
+
+
 
 end
 
