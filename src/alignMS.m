@@ -27,7 +27,7 @@ catch
 end
 
 % Generate unique peak matrix
-allPeaks = uniquePeaks(peakData);
+allPeaks = uniquePeaks(peakData,tolerance);
 
 % Retrieve intensities per peak for each file
 intensityMatrix = generateIntensityMatrix(allPeaks,peakData);
