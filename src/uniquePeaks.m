@@ -1,3 +1,3 @@
-unction peakList = uniquePeaks(allPeaks)
+function peakList = uniquePeaks(allPeaks)
 
 end
