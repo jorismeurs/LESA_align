@@ -27,10 +27,23 @@ catch
 end
 
 % Generate unique peak matrix
+allPeaks = uniquePeaks(peakData);
 
 % Retrieve intensities per peak for each file
+intensityMatrix = generateIntensityMatrix(allPeaks,peak Data);
 
 % Filter variables below threshold abundance and impute remaining missing values
+allowedMissing = 0.2;
+c = [];
+for j = 1:size(intensityMatrix,2) 
+    idx = find(intensityMatrix(:,j)==0);
+    if numel(idx) > allowedMissing*size(intensityMatrix,1) 
+        c = [c;j];
+    end
+end 
+intensityMatrix(:,c) = [];
+intensityMatrix(intensityMatrix==0) = NaN;
+intensityMatrix = knnimpute(intensityMatrix,10);
 
 % Export matrix to an Excel file
 if isempty(parameters.name)
