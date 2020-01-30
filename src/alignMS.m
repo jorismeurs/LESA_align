@@ -30,7 +30,7 @@ end
 allPeaks = uniquePeaks(peakData);
 
 % Retrieve intensities per peak for each file
-intensityMatrix = generateIntensityMatrix(allPeaks,peak Data);
+intensityMatrix = generateIntensityMatrix(allPeaks,peakData);
 
 % Filter variables below threshold abundance and impute remaining missing values
 allowedMissing = 0.2;
@@ -57,52 +57,4 @@ xlswrite([exportName '.xlsx'],FileName','Sheet1'
 
 end
 
-%---------------------------------
-function validateInput(params);
-   for j = 1:length(params)
-      if ~isempty(params.tolerance)
-         if ~isnumeric(params.tolerance) || params.tolerance <= 0
-            errordlg('Invalid input','Choose different value for tolerance');
-            return
-         end
-      else
-         params.tolerance = 5; % Default value
-      end
-      if ~isempty(params.threshold)
-         if ~isnumeric(params.threshold) || params.threshold <= 0
-            errordlg('Invalid input','Choose different value for threshold');
-         end
-      else
-         params.threshold = 10000; % Default value
-      end
-   end
-end
-%---------------------------------
-function mzXMLFiles = convertRaw(rawFiles)
-   if ~exist('mzXML','dir')
-      cd(userpath);
-      mkdir('mzXML');
-   else
-      cd([userpath '\mzXML']);
-      delete *.mzXML
-   end
-   for j = 1:length(rawFile)
-      system('cd C:\ProteoWizard\');
-      system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' [userpath '/mzXML']]);
-   end
-   cd([userpath '\mzXML']);
-   mzXMLFiles = dir('*.mzXML');
-   cd(userpath);
-end
-%---------------------------------
-function peakList = retrievePeaks(files)
-   
-end
-%---------------------------------
-function peakList = uniquePeaks(allPeaks)
 
-end
-%---------------------------------
-function intensityMatrix = generateIntensityMatrix(peakList)
-
-end
