@@ -19,7 +19,7 @@ fileLocation = fullfile(PathName, FileName);
 try
    mzxmlFiles = convertRaw(fileLocation);
    for j = 1:length(mzxmlFiles)
-      peakData{j} = retrievePeaks(mzxmlFiles{j});
+      [peakData{j},val] = retrievePeaks(mzxmlFiles{j});
    end
 catch
    errordlg('Error during peak processing','Something went wrong with files');
