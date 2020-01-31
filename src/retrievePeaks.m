@@ -1,4 +1,4 @@
-function peakList = retrievePeaks(files)
+function [peakList,processVal] = retrievePeaks(files,threshold)
 
    % Select polarity for processing
    processingType = questdlg('Choose polarity','Select polarity for processing data',...
@@ -61,16 +61,49 @@ function peakList = retrievePeaks(files)
       
       % Generate average spectrum for chosen polarity/polarities
       if processVal == 1 || processVal == 2
+         includedData = [];
          for n = 1:length(includedScans)
-         
+            scanData = msStruct.scan(includedScans(n)).peaks.mz;
+            mz = scanData(1:2:end);
+            int = scanData(2:2:end);
+            includedData{n,1} = [mz,int]; 
+         end
+         [MZ,Y] = msppresample(includedData,5e6);
+         averageY(:,n) = nanmean(Y,2);
+      else
+         includedData  = [];
+         for n = 1:length(includedScansPos)
+            scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
+            mz = scanData(1:2:end);
+            int = scanData(2:2:end);
+            includedData{n,1} = [mz,int]; 
+         end
+         [MZPos,Y] = msppresample(includedData,5e6);
+         averageYPos(:,n) = nanmean(Y,2);
+         includedData = [];
+         for n = 1:length(includedScansNeg)
+            scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
+            mz = scanData(1:2:end);
+            int = scanData(2:2:end);
+            includedData{n,1} = [mz,int]; 
+         end
+         [MZPos,Y] = msppresample(includedData,5e6);
+         averageYNeg(:,n) = nanmean(Y,2);
+      end
+      
+      % Perform peak picking
+      if processVal == 1 || processVal == 2
+         for n = 1:size(averageY,2)
+            peakList{n,1} = mspeaks(MZ,averageY(n,1),'HeightFilter',threshold)
          end
       else
-         for n = 1:length(includedScansPos)
-         
+         for n = 1:size(averageYPos,2)
+            peaksPos{n,1} = mspeaks(MZ,averageYPos(n,1),'HeightFilter',threshold);
          end
-         for n = 1:length(includedScansNeg)
-         
+         for n = 1:size(averageYNeg,2)
+            peaksNeg{n,1} = mspeaks(MZ,averageYNeg(n,1),'HeightFilter',threshold);
          end
+         peakList = [peaksPos;peaksNeg]; % Store as 2 x 1 cell array for positive and negative data
       end
    end
 end
