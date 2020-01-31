@@ -2,9 +2,9 @@ function peakList = uniquePeaks(allPeaks, tolerance)
    peakVector = cell2mat(allPeaks);
    r = [];
    peakList = [];
-   for j = 1:length(allPeaks) 
+   for j = 1:length(peakVector) 
       if ~isempty(r) 
-         dup = find(r(:,1)==j)
+         dup = find(r(:,1)==j);
          if ~isempty(dup) 
             continue
          end

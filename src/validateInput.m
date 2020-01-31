@@ -1,4 +1,4 @@
-function validateInput(params);
+function validateInput(params)
    for j = 1:length(params)
       if ~isempty(params.tolerance)
          if ~isnumeric(params.tolerance) || params.tolerance <= 0

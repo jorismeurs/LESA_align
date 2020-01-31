@@ -16,16 +16,36 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
    
    % Parse files
    for j = 1:length(files)
-      msStruct = mzxmlread(files{j});
+      msStruct = mzxmlread(files{j},'Levels',1);
       
       % Get indices for scans to process
       if processVal == 1
-         posIdx = find(msStruct.scan.polarity=='+');
+         posIdx = [];
+         for n = 1:length(msStruct.scan)
+            if msStruct.scan(n).polarity == '+' 
+                posIdx = [posIdx;n];
+            end
+         end
       elseif processVal == 2
-         negIdx = find(msStruct.scan.polarity=='-');
+         negIdx = [];
+         for n = 1:length(msStruct.scan)
+            if msStruct.scan(n).polarity == '-' 
+                negIdx = [negIdx;n];
+            end
+         end
       elseif processVal == 3
-         posIdx = find(msStruct.scan.polarity=='+');
-         negIdx = find(msStruct.scan.polarity=='-');
+         posIdx = [];
+         for n = 1:length(msStruct.scan)
+            if msStruct.scan(n).polarity == '+' 
+                posIdx = [posIdx;n];
+            end
+         end
+         negIdx = [];
+         for n = 1:length(msStruct.scan)
+            if msStruct.scan(n).polarity == '-' 
+                negIdx = [negIdx;n];
+            end
+         end
       end
       
       % Filter scans based on base peak value
@@ -69,7 +89,7 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
             includedData{n,1} = [mz,int]; 
          end
          [MZ,Y] = msppresample(includedData,5e6);
-         averageY(:,n) = nanmean(Y,2);
+         averageY = nanmean(Y,2);
       else
          includedData  = [];
          for n = 1:length(includedScansPos)
@@ -79,7 +99,7 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
             includedData{n,1} = [mz,int]; 
          end
          [MZPos,Y] = msppresample(includedData,5e6);
-         averageYPos(:,n) = nanmean(Y,2);
+         averageYPos = nanmean(Y,2);
          includedData = [];
          for n = 1:length(includedScansNeg)
             scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
@@ -87,21 +107,21 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
             int = scanData(2:2:end);
             includedData{n,1} = [mz,int]; 
          end
-         [MZPos,Y] = msppresample(includedData,5e6);
-         averageYNeg(:,n) = nanmean(Y,2);
+         [MZNeg,Y] = msppresample(includedData,5e6);
+         averageYNeg = nanmean(Y,2);
       end
       
       % Perform peak picking
       if processVal == 1 || processVal == 2
          for n = 1:size(averageY,2)
-            peakList{n,1} = mspeaks(MZ,averageY(n,1),'HeightFilter',threshold)
+            peakList{j,1} = mspeaks(MZ,averageY,'HeightFilter',threshold);
          end
       else
          for n = 1:size(averageYPos,2)
-            peaksPos{n,1} = mspeaks(MZ,averageYPos(n,1),'HeightFilter',threshold);
+            peaksPos{j,1} = mspeaks(MZPos,averageYPos,'HeightFilter',threshold);
          end
          for n = 1:size(averageYNeg,2)
-            peaksNeg{n,1} = mspeaks(MZ,averageYNeg(n,1),'HeightFilter',threshold);
+            peaksNeg{j,1} = mspeaks(MZNeg,averageYNeg,'HeightFilter',threshold);
          end
          peakList = [peaksPos;peaksNeg]; % Store as 2 x 1 cell array for positive and negative data
       end

@@ -2,10 +2,13 @@
 %
 % (c) Joris Meurs, MSc (2020)
 
-function alignMS(parameters) 
+%function alignMS(parameters) 
 
 % Check validity of input parameters from GUI
-validateInput(parameters);
+%validateInput(parameters);
+parameters.tolerance = 5;
+parameters.threshold = 10000;
+parameters.name = 'Test';
 cd([userpath '\LESA_align-master']);
 addpath([userpath '\LESA_align-master\src']);
 
@@ -75,7 +78,7 @@ else
         matOut{j} = tempMat;
     end
 end
-
+%%
 % Export matrix to an Excel file
 if isempty(parameters.name)
    exportName = [datestr(datetime,'YYYYMMDDhhmmss') '_output'];
@@ -96,13 +99,10 @@ else
             xlswrite([exportName '.xlsx'],FileName','pos','A2');
             xlswrite([exportName '.xlsx'],tempPeaks','pos','B1'); 
         else
-            xlswrite([exportName '.xlsx'],tempMat,'neg','B2');
-            xlswrite([exportName '.xlsx'],FileName','neg','A2');
-            xlswrite([exportName '.xlsx'],tempPeaks','neg','B1');
+            
         end
     end
 end
-
-end
+%end
 
 
