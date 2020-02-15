@@ -2,8 +2,18 @@
 Aligment tool for LESA-MS and direct infusion MS data
 
 # Requirements
+
+## ProteoWizard
 1. Download ProteoWizard (http://proteowizard.sourceforge.net/download.html)
 2. Install ProteoWizard. Make sure the installation folder is C:\ProteoWizard
+
+## MATLAB Runtime Compiler
+1. Download MATLAB Runtime Compiler
+2. Install at default location
+
+## LESA Alignment Tool
+1. In the master folder, click release and download the latest version of LESA Alignment Tool
+2. Unzip the folder at a desired location
 
 # How to use
 1. Open LESA_align.exe
