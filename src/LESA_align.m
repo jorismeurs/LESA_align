@@ -1,7 +1,7 @@
 function varargout = LESA_align(varargin)
 % Tool for alignment of direct infusion type mass spectrometry data
 
-% Last Modified by GUIDE v2.5 28-Jan-2020 19:32:29
+% Last Modified by GUIDE v2.5 15-Feb-2020 15:16:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -35,6 +35,7 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
+set(handles.figure1, 'Name', 'LESA Alignment Tool');
 guidata(hObject, handles);
 
 % UIWAIT makes LESA_align wait for user response (see UIRESUME)
@@ -57,3 +58,149 @@ function startProcess_Callback(hObject, eventdata, handles)
 % hObject    handle to startProcess (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+parameters.minMZ = str2num(get(handles.minMZ,'String'));
+parameters.maxMZ = str2num(get(handles.maxMZ,'String'));
+parameters.threshold = str2num(get(handles.thresholdInt,'String'));
+parameters.tolerance = str2num(get(handles.massTolerance,'String'));
+parameters.name = get(handles.fileName,'String');
+parameters.polarity = get(handles.polaritySelection,'Value');
+alignMS(parameters);
+
+
+
+
+function thresholdInt_Callback(hObject, eventdata, handles)
+% hObject    handle to thresholdInt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of thresholdInt as text
+%        str2double(get(hObject,'String')) returns contents of thresholdInt as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function thresholdInt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to thresholdInt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function massTolerance_Callback(hObject, eventdata, handles)
+% hObject    handle to massTolerance (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of massTolerance as text
+%        str2double(get(hObject,'String')) returns contents of massTolerance as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function massTolerance_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to massTolerance (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function minMZ_Callback(hObject, eventdata, handles)
+% hObject    handle to minMZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minMZ as text
+%        str2double(get(hObject,'String')) returns contents of minMZ as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minMZ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minMZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function fileName_Callback(hObject, eventdata, handles)
+% hObject    handle to fileName (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of fileName as text
+%        str2double(get(hObject,'String')) returns contents of fileName as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function fileName_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to fileName (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxMZ_Callback(hObject, eventdata, handles)
+% hObject    handle to maxMZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxMZ as text
+%        str2double(get(hObject,'String')) returns contents of maxMZ as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxMZ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxMZ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in polaritySelection.
+function polaritySelection_Callback(hObject, eventdata, handles)
+% hObject    handle to polaritySelection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns polaritySelection contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from polaritySelection
+
+
+% --- Executes during object creation, after setting all properties.
+function polaritySelection_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to polaritySelection (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

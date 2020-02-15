@@ -1,24 +1,21 @@
-function [peakList,processVal] = retrievePeaks(files,threshold)
+function [peakList,processVal] = retrievePeaks(files,parameters)
 
-   % Select polarity for processing
-   processingType = questdlg('Choose polarity','Select polarity for processing data',...
-      'Positive','Negative','Both','Positive');
-   switch processingType
-      case 'Positive'
-         processVal = 1;
-      case 'Negative'
-         processVal = 2;
-      case 'Both'
-         processVal = 3;
-      otherwise
-         processVal = 1; % Default is positive when no parameter is chosen
-   end
+   % Get threshold value for peak intensity
+   threshold = parameters.threshold;
+   processVal = parameters.polarity;
    
+   wb = waitbar(0,sprintf('Peak picking'));
+   set(findall(wb),'Units', 'normalized');
+    % Change the size of the figure
+    set(wb,'Position', [0.5 0.5 0.2 0.2]);   
+
    % Parse files
    for j = 1:length(files)
+      wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Parsing mzXML',j,length(files))); 
       msStruct = mzxmlread(files{j},'Levels',1);
       
       % Get indices for scans to process
+      wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Retrieve scan indices',j,length(files)));
       if processVal == 1
          posIdx = [];
          for n = 1:length(msStruct.scan)
@@ -50,6 +47,7 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
       
       % Filter scans based on base peak value
       % Base peak should be larger than 1e5
+      wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Filter scans',j,length(files)));
       if processVal == 1
          includedScans = [];
          for n = 1:length(posIdx)
@@ -79,6 +77,14 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
          end
       end
       
+      % Generate CMZ vector (Race et al., Anal Chem.)
+      wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Interpolation CMZ',j,length(files)));
+      binSize = -8e-8; % Empirical value
+      minMZ = parameters.minMZ;
+      maxMZ = parameters.maxMZ;
+      mzChannels = 1/sqrt(minMZ):binSize:1/sqrt(maxMZ)+binSize;
+      mzChannels = ones(size(mzChannels))./(mzChannels.^2);
+      
       % Generate average spectrum for chosen polarity/polarities
       if processVal == 1 || processVal == 2
          includedData = [];
@@ -86,44 +92,43 @@ function [peakList,processVal] = retrievePeaks(files,threshold)
             scanData = msStruct.scan(includedScans(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
-            includedData{n,1} = [mz,int]; 
+            [mz,idx] = unique(mz);
+            int = int(idx,1);
+            includedData = [includedData;interp1(mz,int,mzChannels,'linear')];
          end
-         [MZ,Y] = msppresample(includedData,5e6);
-         averageY = nanmean(Y,2);
+         averageY = nanmean(includedData,1);
       else
-         includedData  = [];
+         includedDataPos  = [];
          for n = 1:length(includedScansPos)
             scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
-            includedData{n,1} = [mz,int]; 
+            [mz,idx] = unique(mz);
+            int = int(idx,1);
+            includedDataPos = [includedDataPos;interp1(mz,int,mzChannels,'linear')];
          end
-         [MZPos,Y] = msppresample(includedData,5e6);
-         averageYPos = nanmean(Y,2);
-         includedData = [];
+         averageYPos = nanmean(includedDataPos,1);
+         includedDataNeg = [];
          for n = 1:length(includedScansNeg)
             scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
-            includedData{n,1} = [mz,int]; 
+            [mz,idx] = unique(mz);
+            int = int(idx,1);
+            includedDataNeg = [includedDataNeg;interp1(mz,int,mzChannels,'linear')]; 
          end
-         [MZNeg,Y] = msppresample(includedData,5e6);
-         averageYNeg = nanmean(Y,2);
+         averageYNeg = nanmean(includedDataNeg,1);
       end
       
+      wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Peak picking',j,length(files)));
       % Perform peak picking
       if processVal == 1 || processVal == 2
-         for n = 1:size(averageY,2)
-            peakList{j,1} = mspeaks(MZ,averageY,'HeightFilter',threshold);
-         end
+          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold);
       else
-         for n = 1:size(averageYPos,2)
-            peaksPos{j,1} = mspeaks(MZPos,averageYPos,'HeightFilter',threshold);
-         end
-         for n = 1:size(averageYNeg,2)
-            peaksNeg{j,1} = mspeaks(MZNeg,averageYNeg,'HeightFilter',threshold);
-         end
-         peakList = [peaksPos;peaksNeg]; % Store as 2 x 1 cell array for positive and negative data
+          peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold);
+          peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold);
+          peakList = [peakListPos;peakListNeg]; % Store as 2 x 1 cell array for positive and negative data
       end
    end
+   delete(wb);
 end
