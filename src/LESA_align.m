@@ -1,7 +1,7 @@
 function varargout = LESA_align(varargin)
 % Tool for alignment of direct infusion type mass spectrometry data
 
-% Last Modified by GUIDE v2.5 15-Feb-2020 15:16:24
+% Last Modified by GUIDE v2.5 16-Feb-2020 16:11:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -36,6 +36,8 @@ handles.output = hObject;
 
 % Update handles structure
 set(handles.figure1, 'Name', 'LESA Alignment Tool');
+cd([userpath '\LESA_align-master']);
+addpath([userpath '\LESA_align-master\src']);
 guidata(hObject, handles);
 
 % UIWAIT makes LESA_align wait for user response (see UIRESUME)
@@ -64,8 +66,8 @@ parameters.threshold = str2num(get(handles.thresholdInt,'String'));
 parameters.tolerance = str2num(get(handles.massTolerance,'String'));
 parameters.name = get(handles.fileName,'String');
 parameters.polarity = get(handles.polaritySelection,'Value');
+parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
 alignMS(parameters);
-
 
 
 
@@ -204,3 +206,38 @@ function polaritySelection_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function backgroundSpectrum_Callback(hObject, eventdata, handles)
+% hObject    handle to backgroundSpectrum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of backgroundSpectrum as text
+%        str2double(get(hObject,'String')) returns contents of backgroundSpectrum as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function backgroundSpectrum_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to backgroundSpectrum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in browseFile.
+function browseFile_Callback(hObject, eventdata, handles)
+% hObject    handle to browseFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[FileName,PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'});
+if isequal(FileName,0)
+    return
+end
+set(handles.backgroundSpectrum,'String',fullfile(PathName,FileName));
