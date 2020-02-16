@@ -6,8 +6,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
    
    wb = waitbar(0,sprintf('Peak picking'));
    set(findall(wb),'Units', 'normalized');
-    % Change the size of the figure
-    set(wb,'Position', [0.5 0.5 0.2 0.2]);   
+   set(wb,'Position', [0.5 0.5 0.2 0.2]);   
 
    % Parse files
    for j = 1:length(files)
@@ -87,46 +86,56 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       
       % Generate average spectrum for chosen polarity/polarities
       if processVal == 1 || processVal == 2
-         includedData = [];
+         includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
          for n = 1:length(includedScans)
             scanData = msStruct.scan(includedScans(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
             [mz,idx] = unique(mz);
             int = int(idx,1);
-            includedData = [includedData;interp1(mz,int,mzChannels,'linear')];
+            mzData{n,1} = mz;
+            intData{n,1} = int;
          end
-         averageY = nanmean(includedData,1);
+         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+         interpolatedSpectra = cell2mat(interpolatedSpectra);
+         averageY = nanmean(interpolatedSpectra,1);
       else
-         includedDataPos  = [];
+         includedDataPos  = []; mzData = []; intData = []; interpolatedSpectra = [];
          for n = 1:length(includedScansPos)
             scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
             [mz,idx] = unique(mz);
             int = int(idx,1);
-            includedDataPos = [includedDataPos;interp1(mz,int,mzChannels,'linear')];
+            mzData{n,1} = mz;
+            intData{n,1} = int;
          end
-         averageYPos = nanmean(includedDataPos,1);
-         includedDataNeg = [];
+         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+         interpolatedSpectra = cell2mat(interpolatedSpectra);
+         averageYPos = nanmean(interpolatedSpectra,1);
+         
+         includedDataNeg = []; mzData = []; intData = []; interpolatedSpectra = [];
          for n = 1:length(includedScansNeg)
             scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
             mz = scanData(1:2:end);
             int = scanData(2:2:end);
             [mz,idx] = unique(mz);
             int = int(idx,1);
-            includedDataNeg = [includedDataNeg;interp1(mz,int,mzChannels,'linear')]; 
+            mzData{n,1} = mz;
+            intData{n,1} = int;
          end
-         averageYNeg = nanmean(includedDataNeg,1);
+         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+         interpolatedSpectra = cell2mat(interpolatedSpectra);
+         averageYNeg = nanmean(interpolatedSpectra,1);
       end
       
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Peak picking',j,length(files)));
       % Perform peak picking
       if processVal == 1 || processVal == 2
-          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold);
+          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
       else
-          peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold);
-          peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold);
+          peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold,'Denoising',false);
+          peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold,'Denoising',false);
           peakList = [peakListPos;peakListNeg]; % Store as 2 x 1 cell array for positive and negative data
       end
    end
