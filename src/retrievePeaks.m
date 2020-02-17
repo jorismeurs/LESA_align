@@ -87,19 +87,19 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       % Generate average spectrum for chosen polarity/polarities
       if processVal == 1 || processVal == 2
          if ~isempty(includedScans) 
-         includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
-         for n = 1:length(includedScans)
-            scanData = msStruct.scan(includedScans(n)).peaks.mz;
-            mz = scanData(1:2:end);
-            int = scanData(2:2:end);
-            [mz,idx] = unique(mz);
-            int = int(idx,1);
-            mzData{n,1} = mz;
-            intData{n,1} = int;
-         end
-         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
-         interpolatedSpectra = cell2mat(interpolatedSpectra);
-         averageY = nanmean(interpolatedSpectra,1);
+             includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
+             for n = 1:length(includedScans)
+                scanData = msStruct.scan(includedScans(n)).peaks.mz;
+                mz = scanData(1:2:end);
+                int = scanData(2:2:end);
+                [mz,idx] = unique(mz);
+                int = int(idx,1);
+                mzData{n,1} = mz;
+                intData{n,1} = int;
+             end
+             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = cell2mat(interpolatedSpectra);
+             averageY = nanmean(interpolatedSpectra,1);
          else
              peakList{j,1} = [];
              continue
@@ -107,37 +107,37 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       else
          includedDataPos  = []; mzData = []; intData = []; interpolatedSpectra = [];
          if ~isempty(includedScansPos) 
-         for n = 1:length(includedScansPos)
-            scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
-            mz = scanData(1:2:end);
-            int = scanData(2:2:end);
-            [mz,idx] = unique(mz);
-            int = int(idx,1);
-            mzData{n,1} = mz;
-            intData{n,1} = int;
-         end
-         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
-         interpolatedSpectra = cell2mat(interpolatedSpectra);
-         averageYPos = nanmean(interpolatedSpectra,1);
+             for n = 1:length(includedScansPos)
+                scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
+                mz = scanData(1:2:end);
+                int = scanData(2:2:end);
+                [mz,idx] = unique(mz);
+                int = int(idx,1);
+                mzData{n,1} = mz;
+                intData{n,1} = int;
+             end
+             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = cell2mat(interpolatedSpectra);
+             averageYPos = nanmean(interpolatedSpectra,1);
          else
              peakListPos{j,1} = [];
              continue
          end
 
          if ~isempty(includedScansNeg) 
-         includedDataNeg = []; mzData = []; intData = []; interpolatedSpectra = [];
-         for n = 1:length(includedScansNeg)
-            scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
-            mz = scanData(1:2:end);
-            int = scanData(2:2:end);
-            [mz,idx] = unique(mz);
-            int = int(idx,1);
-            mzData{n,1} = mz;
-            intData{n,1} = int;
-         end
-         interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
-         interpolatedSpectra = cell2mat(interpolatedSpectra);
-         averageYNeg = nanmean(interpolatedSpectra,1);
+             includedDataNeg = []; mzData = []; intData = []; interpolatedSpectra = [];
+             for n = 1:length(includedScansNeg)
+                scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
+                mz = scanData(1:2:end);
+                int = scanData(2:2:end);
+                [mz,idx] = unique(mz);
+                int = int(idx,1);
+                mzData{n,1} = mz;
+                intData{n,1} = int;
+             end
+             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = cell2mat(interpolatedSpectra);
+             averageYNeg = nanmean(interpolatedSpectra,1);
          else
             peakListNeg{j,1} = [];
             continue

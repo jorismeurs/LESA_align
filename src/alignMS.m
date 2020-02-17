@@ -60,15 +60,15 @@ end
 % Retrieve intensities per peak for each file
 intensityMatrix = [];
 if val ~= 3
-    intensityMatrix = generateIntensityMatrix(allPeaks,peakData,parameters);
+    [intensityMatrix,emptyIDX] = generateIntensityMatrix(allPeaks,peakData,parameters);
 else
     posIDX = 1:length(peakData)/2;
     negIDX = (length(peakData)/2)+1:length(peakData);
     for j = 1:2
         if j == 1
-            intensityMatrix{j} = generateIntensityMatrix(cell2mat(allPeaks(j)),peakData(posIDX),parameters);
+            [intensityMatrix{j},emptyIDX{j}] = generateIntensityMatrix(cell2mat(allPeaks(j)),peakData(posIDX),parameters);
         else
-            intensityMatrix{j} = generateIntensityMatrix(cell2mat(allPeaks(j)),peakData(negIDX),parameters);
+            [intensityMatrix{j},emptyIDX{j}] = generateIntensityMatrix(cell2mat(allPeaks(j)),peakData(negIDX),parameters);
         end
     end
 end
@@ -124,20 +124,34 @@ catch
 end
 
 if val ~= 3
+    % Remove file names from spectra without peaks
+    if ~isempty(emptyIDX)
+       FileName(emptyIDX) = [];
+    end
     xlswrite([exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
     xlswrite([exportName '.xlsx'],FileName','Sheet1','A2');
     xlswrite([exportName '.xlsx'],allPeaks','Sheet1','B1');
 else
+    % Create separate file name cell arrays in case for one polarity peaks
+    % are missing
+    FileNamePos = FileName;
+    FileNameNeg = FileName;
     for j = 1:2
         tempMat = cell2mat(matOut(j));
         tempPeaks = cell2mat(peakOut(j));
-        if j == 1            
+        if j == 1
+            if ~isempty(emptyIDX)
+               FileNamePos(emptyIDX) = [];
+            end
             xlswrite([exportName '.xlsx'],tempMat,'pos','B2');
-            xlswrite([exportName '.xlsx'],FileName','pos','A2');
+            xlswrite([exportName '.xlsx'],FileNamePos','pos','A2');
             xlswrite([exportName '.xlsx'],tempPeaks','pos','B1'); 
         else
+            if ~isempty(emptyIDX)
+               FileNameNeg(emptyIDX) = [];
+            end
             xlswrite([exportName '.xlsx'],tempMat,'neg','B2');
-            xlswrite([exportName '.xlsx'],FileName','neg','A2');
+            xlswrite([exportName '.xlsx'],FileNameNeg','neg','A2');
             xlswrite([exportName '.xlsx'],tempPeaks','neg','B1');
         end
     end
