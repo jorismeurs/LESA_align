@@ -8,6 +8,7 @@ function mzXMLFiles = convertRaw(Path,Files)
    if isequal(fileExt,'mzXML')
        cd(Path);
        mzXMLList = dir('*.mzXML');
+       mzXMLFiles = [];
        for j = 1:size(mzXMLList,1)
            tempName = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
            mzXMLFiles = [mzXMLFiles;{tempName}];
@@ -19,9 +20,9 @@ function mzXMLFiles = convertRaw(Path,Files)
        rawFiles = fullfile(Path,Files);
        for j = 1:length(rawFiles)
           system('cd C:\ProteoWizard\');
-          system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' [userpath '\mzXML']]);
+          system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' Path]);
        end
-       cd([userpath '\mzXML']);
+       cd(Path);
        mzXMLList = dir('*.mzXML');
        mzXMLFiles = [];
        for j = 1:size(mzXMLList,1)
