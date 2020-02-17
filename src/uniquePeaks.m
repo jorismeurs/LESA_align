@@ -1,7 +1,6 @@
 function peakList = uniquePeaks(allPeaks, parameters)
    tolerance = parameters.tolerance;
    peakVector = cell2mat(allPeaks);
-   peakVector(isempty(peakVector)) = [];
    r = [];
    peakList = [];
    for j = 1:length(peakVector) 
