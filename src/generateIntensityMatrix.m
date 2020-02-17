@@ -1,6 +1,6 @@
 function intensityMatrix = generateIntensityMatrix(peakList,peakData,parameters)
     tolerance = parameters.tolerance;
-    emptyIDX = cellfun(@(data) isempty(data),peakData,'UniformOutput',false);
+    emptyIDX = find(cellfun(@isempty,peakData));
     fileCount = length(peakData)-length(emptyIDX);
     intensityMatrix = zeros(fileCount,length(peakList));
     for j = 1:length(peakList) 
