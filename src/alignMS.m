@@ -13,7 +13,7 @@ function alignMS(parameters)
 % parameters.maxMZ = 1050;
 addpath([userpath '\LESA_align-master\src']);
 validateInput(parameters);
-%cd([userpath '\LESA_align-master']);
+cd([userpath '\LESA_align-master']);
 
 % Browse for files
 % mzXML not supported yet
