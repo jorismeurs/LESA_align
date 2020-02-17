@@ -11,10 +11,9 @@ function alignMS(parameters)
 % parameters.polarity = 3;
 % parameters.minMZ = 70;
 % parameters.maxMZ = 1050;
-
-validateInput(parameters);
-cd([userpath '\LESA_align-master']);
 addpath([userpath '\LESA_align-master\src']);
+validateInput(parameters);
+%cd([userpath '\LESA_align-master']);
 
 % Browse for files
 % mzXML not supported yet
@@ -26,13 +25,13 @@ end
 %fileLocation = fullfile(PathName, FileName);
 
 % Retrieve peaklist per file
-try
+%try
    mzxmlFiles = convertRaw(PathName,FileName);
    [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-catch
-   errordlg('Error during peak processing','Something went wrong with files');
-   return
-end
+%catch
+%   errordlg('Error during peak processing','Something went wrong with files');
+%   return
+%end
 
 % Generate unique peak matrix
 if val ~=3
@@ -49,12 +48,24 @@ else
     end
 end
 
-if val~=3
+% Remove isotopes from peak list
+if val ~= 3
     allPeaks = deisotope(allPeaks);
 else
     for j = 1:2
        allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
     end
+end
+
+% Subtract background peaks if file provided
+if ~isempty(parameters.backgroundSpectrum)
+   if val ~= 3
+       allPeaks = subtractBackground(allPeaks,parameters);
+   else
+      for j = 1:2
+         allPeaks{j} = subtractBackground(cell2mat(allPeaks(j)),parameters,j); 
+      end
+   end
 end
 
 % Retrieve intensities per peak for each file
@@ -128,9 +139,9 @@ if val ~= 3
     if ~isempty(emptyIDX)
        FileName(emptyIDX) = [];
     end
-    xlswrite([exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
-    xlswrite([exportName '.xlsx'],FileName','Sheet1','A2');
-    xlswrite([exportName '.xlsx'],allPeaks','Sheet1','B1');
+    xlswrite([PathName '\' exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
+    xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
+    xlswrite([PathName '\' exportName '.xlsx'],allPeaks','Sheet1','B1');
 else
     % Create separate file name cell arrays in case for one polarity peaks
     % are missing
@@ -141,18 +152,20 @@ else
         tempPeaks = cell2mat(peakOut(j));
         if j == 1
             if ~isempty(emptyIDX)
-               FileNamePos(emptyIDX) = [];
+               emptyIDXPos = cell2mat(emptyIDX(j)); 
+               FileNamePos(emptyIDXPos) = [];
             end
-            xlswrite([exportName '.xlsx'],tempMat,'pos','B2');
-            xlswrite([exportName '.xlsx'],FileNamePos','pos','A2');
-            xlswrite([exportName '.xlsx'],tempPeaks','pos','B1'); 
+            xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
+            xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
+            xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
         else
             if ~isempty(emptyIDX)
-               FileNameNeg(emptyIDX) = [];
+               emptyIDXNeg = cell2mat(emptyIDX(j)); 
+               FileNameNeg(emptyIDXNeg) = [];
             end
-            xlswrite([exportName '.xlsx'],tempMat,'neg','B2');
-            xlswrite([exportName '.xlsx'],FileNameNeg','neg','A2');
-            xlswrite([exportName '.xlsx'],tempPeaks','neg','B1');
+            xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
+            xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
+            xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
         end
     end
 end
