@@ -1,7 +1,7 @@
 function varargout = LESA_align(varargin)
 % Tool for alignment of direct infusion type mass spectrometry data
 
-% Last Modified by GUIDE v2.5 16-Feb-2020 16:11:04
+% Last Modified by GUIDE v2.5 18-Feb-2020 15:41:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -35,9 +35,13 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
-%set(handles.figure1, 'Name', 'LESA Alignment Tool');
-%cd([userpath '\LESA_align-master']);
-%addpath([userpath '\LESA_align-master\src']);
+handles.processVal = [];
+axes(handles.axes1);
+set(gca,'XTick',[],'YTick',[]);
+rectangle('Position',[0 0 1 1]);
+
+%close(h);
+
 guidata(hObject, handles);
 
 % UIWAIT makes LESA_align wait for user response (see UIRESUME)
@@ -67,7 +71,10 @@ parameters.tolerance = str2num(get(handles.massTolerance,'String'));
 parameters.name = get(handles.fileName,'String');
 parameters.polarity = get(handles.polaritySelection,'Value');
 parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
-alignMS(parameters);
+axes(handles.axes1)
+patch([0 1 1 0],[0 0 1 1],[1 1 1]);
+alignMS(parameters,handles);
+guidata(hObject, handles);
 
 
 
