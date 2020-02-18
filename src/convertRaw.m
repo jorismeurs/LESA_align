@@ -6,13 +6,9 @@ function mzXMLFiles = convertRaw(Path,Files)
    
    % No conversion needed when files are mzXML
    if isequal(fileExt,'mzXML')
-       cd(Path);
-       mzXMLList = dir('*.mzXML');
-       mzXMLFiles = [];
-       for j = 1:size(mzXMLList,1)
-           tempName = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
-           mzXMLFiles = [mzXMLFiles;{tempName}];
-       end
+       %cd(Path);
+       %mzXMLList = dir('*.mzXML');
+       mzXMLFiles = fullfile(Path,Files);
        %cd([userpath '\LESA_align-master\src']);
    
    % Convert RAW to mzXML
@@ -22,11 +18,13 @@ function mzXMLFiles = convertRaw(Path,Files)
           system('cd C:\ProteoWizard\');
           system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' Path]);
        end
-       cd(Path);
-       mzXMLList = dir('*.mzXML');
+       %cd(Path);
+       %mzXMLList = dir('*.mzXML');
        mzXMLFiles = [];
-       for j = 1:size(mzXMLList,1)
-           tempName = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
+       for j = 1:length(rawFiles)
+           fileExtLoc = find(Files{j}=='.');
+           tempName = fullfile(Path,[Files{j}(1:fileExtLoc) 'mzXML']);
+           disp(tempName);
            mzXMLFiles = [mzXMLFiles;{tempName}];
        end
        %cd([userpath '\LESA_align-master\src']);
