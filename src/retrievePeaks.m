@@ -97,7 +97,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
                 mzData{n,1} = mz;
                 intData{n,1} = int;
              end
-             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = fastInterp1(mzData,intData,mzChannels);
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageY = nanmean(interpolatedSpectra,1);
          else
@@ -116,7 +116,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
                 mzData{n,1} = mz;
                 intData{n,1} = int;
              end
-             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = fastInterp1(mzData,intData,mzChannels);
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageYPos = nanmean(interpolatedSpectra,1);
          else
@@ -135,7 +135,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
                 mzData{n,1} = mz;
                 intData{n,1} = int;
              end
-             interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
+             interpolatedSpectra = fastInterp1(mzData,intData,mzChannels);
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageYNeg = nanmean(interpolatedSpectra,1);
          else
@@ -147,7 +147,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Peak picking',j,length(files)));
       % Perform peak picking
       if processVal == 1 || processVal == 2
-          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
+          peakList = findpeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
       else
           peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold,'Denoising',false);
           peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold,'Denoising',false);
