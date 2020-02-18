@@ -147,7 +147,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Peak picking',j,length(files)));
       % Perform peak picking
       if processVal == 1 || processVal == 2
-          peakList = findpeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
+          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
       else
           peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold,'Denoising',false);
           peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold,'Denoising',false);
