@@ -98,7 +98,7 @@ if val ~= 3
     end
     xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
     xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
-    xlswrite([PathName '\' exportName '.xlsx'],orignalPeaks','Sheet1','B1');
+    xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
 else
     % Create separate file name cell arrays in case for one polarity peaks
     % are missing
