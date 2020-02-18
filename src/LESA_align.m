@@ -35,9 +35,9 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
-set(handles.figure1, 'Name', 'LESA Alignment Tool');
-cd([userpath '\LESA_align-master']);
-addpath([userpath '\LESA_align-master\src']);
+%set(handles.figure1, 'Name', 'LESA Alignment Tool');
+%cd([userpath '\LESA_align-master']);
+%addpath([userpath '\LESA_align-master\src']);
 guidata(hObject, handles);
 
 % UIWAIT makes LESA_align wait for user response (see UIRESUME)

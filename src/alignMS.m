@@ -11,9 +11,9 @@ function alignMS(parameters)
 % parameters.polarity = 3;
 % parameters.minMZ = 70;
 % parameters.maxMZ = 1050;
-addpath([userpath '\LESA_align-master\src']);
-validateInput(parameters);
-cd([userpath '\LESA_align-master']);
+%addpath([userpath '\LESA_align-master\src']);
+%validateInput(parameters);
+%cd([userpath '\LESA_align-master']);
 
 % Browse for files
 % mzXML not supported yet

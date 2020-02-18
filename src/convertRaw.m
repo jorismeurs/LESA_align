@@ -13,7 +13,7 @@ function mzXMLFiles = convertRaw(Path,Files)
            tempName = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
            mzXMLFiles = [mzXMLFiles;{tempName}];
        end
-       cd([userpath '\LESA_align-master\src']);
+       %cd([userpath '\LESA_align-master\src']);
    
    % Convert RAW to mzXML
    elseif isequal(fileExt,'raw')
@@ -29,6 +29,6 @@ function mzXMLFiles = convertRaw(Path,Files)
            tempName = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
            mzXMLFiles = [mzXMLFiles;{tempName}];
        end
-       cd([userpath '\LESA_align-master\src']);
+       %cd([userpath '\LESA_align-master\src']);
    end
 end
