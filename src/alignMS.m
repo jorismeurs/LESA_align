@@ -53,24 +53,23 @@ try
 catch
     failedProcess(handles);
 end
-size(peakData)
+
 
 % Generate unique peak matrix
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-posIDX = 1:length(peakData)/2;
+
 negIDX = (length(peakData)/2)+1:length(peakData);
-disp(cell2mat(peakData(negIDX,1)));
-catch
-   disp('Something wrong here'); 
-   return 
-end
+posIDX = 1:length(peakData)/2;
+
+% Change processing value if polarity data is completely missing 
 if isempty(cell2mat(peakData(posIDX,1)))
     val = 2;
+    peakData = peakData(negIDX,1);
 end
 if isempty(cell2mat(peakData(negIDX,1)))
     val = 1;
+    peakData = peakData(posIDX,1);
 end
 try
     if val ~=3
