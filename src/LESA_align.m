@@ -35,12 +35,24 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
-handles.processVal = [];
+set(handles.figure1,'Name','LESA Alignment Tool');
+handles.processNames = {
+    'Validating parameters'
+    'Loading files...'
+    'Converting files to .mzXML...'
+    'Retrieving peak lists...'
+    'Get unique peaks...'
+    'Removing isotopes...'
+    'Remove background...'
+    'Generating intensity matrix...'
+    'Exporting unfiltered matrix...'
+    'Filter and impute matrix...'
+    'Exporting filtered matrix....'
+    'Finished'
+    };
 axes(handles.axes1);
 set(gca,'XTick',[],'YTick',[]);
 rectangle('Position',[0 0 1 1]);
-
-%close(h);
 
 guidata(hObject, handles);
 

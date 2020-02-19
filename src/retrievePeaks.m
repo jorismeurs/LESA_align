@@ -1,13 +1,16 @@
 function [peakList,processVal] = retrievePeaks(files,parameters)
 
-   % Get threshold value for peak intensity
+   % Get parameters
    threshold = parameters.threshold;
    processVal = parameters.polarity;
-   
+   minMZ = parameters.minMZ;
+   maxMZ = parameters.maxMZ;
+
+   peakList = []; peakListPos = []; peakListNeg = [];
    wb = waitbar(0,sprintf('Peak picking'));
    set(findall(wb),'Units', 'normalized');
    set(wb,'Position', [0.5 0.5 0.2 0.2]);   
-
+   
    % Parse files
    for j = 1:length(files)
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Parsing mzXML',j,length(files))); 
@@ -79,8 +82,6 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       % Generate CMZ vector (Race et al., Anal Chem.)
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Interpolation CMZ',j,length(files)));
       binSize = -8e-8; % Empirical value
-      minMZ = parameters.minMZ;
-      maxMZ = parameters.maxMZ;
       mzChannels = 1/sqrt(minMZ):binSize:1/sqrt(maxMZ)+binSize;
       mzChannels = ones(size(mzChannels))./(mzChannels.^2);
       
@@ -101,8 +102,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageY = nanmean(interpolatedSpectra,1);
          else
-             peakList{j,1} = [];
-             continue
+             averageY = [];
          end
       else
          includedDataPos  = []; mzData = []; intData = []; interpolatedSpectra = [];
@@ -120,8 +120,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageYPos = nanmean(interpolatedSpectra,1);
          else
-             peakListPos{j,1} = [];
-             continue
+             averageYPos = [];
          end
 
          if ~isempty(includedScansNeg) 
@@ -139,20 +138,31 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
              interpolatedSpectra = cell2mat(interpolatedSpectra);
              averageYNeg = nanmean(interpolatedSpectra,1);
          else
-            peakListNeg{j,1} = [];
-            continue
+            averageYNeg = [];
          end
       end
       
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Peak picking',j,length(files)));
       % Perform peak picking
       if processVal == 1 || processVal == 2
-          peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
+          if ~isempty(averageY)
+              peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
+          else
+              peakList{j,1} = [];
+          end
       else
-          peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold,'Denoising',false);
-          peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold,'Denoising',false);
+          if ~isempty(averageYPos)
+              peakListPos{j,1} = mspeaks(mzChannels',averageYPos','HeightFilter',threshold,'Denoising',false);
+          else
+              peakListPos{j,1} = [];
+          end
+          if ~isempty(averageYNeg)
+              peakListNeg{j,1} = mspeaks(mzChannels',averageYNeg','HeightFilter',threshold,'Denoising',false);
+          else
+              peakListNeg{j,1} = [];
+          end
           peakList = [peakListPos;peakListNeg]; % Store as 2 x 1 cell array for positive and negative data
       end
    end
    delete(wb);
-end
+%end

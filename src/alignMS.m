@@ -3,23 +3,28 @@
 % (c) Joris Meurs, MSc (2020)
 
 function alignMS(parameters,handles) 
+% parameters.minMZ = 70;
+% parameters.maxMZ = 1050;
+% parameters.tolerance = 5;
+% parameters.threshold = 10000;
+% parameters.polarity = 3;
+
 % Initiate process
 processVal = 0;
 updateProcess(processVal,handles);
 
 % Check validity of input parameters from GUI
-
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     validateInput(parameters);
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
 
-
 % Browse for files
-% mzXML not supported yet
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
     'MultiSelect','on');
@@ -27,37 +32,56 @@ try
         failedProcess(handles);
         return
     end 
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
+catch
+   failedProcess(handles); 
+end
+
+% Convert .RAW files
+processVal = processVal+1;
+updateProcess(processVal,handles);
+try
+    mzxmlFiles = convertRaw(PathName,FileName);
 catch
    failedProcess(handles); 
 end
 
 % Retrieve peaklist per file
-try
-    mzxmlFiles = convertRaw(PathName,FileName);
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
-catch
-   failedProcess(handles); 
-end
-
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
+size(peakData)
 
 % Generate unique peak matrix
+processVal = processVal+1;
+updateProcess(processVal,handles);
+try
+posIDX = 1:length(peakData)/2;
+negIDX = (length(peakData)/2)+1:length(peakData);
+disp(cell2mat(peakData(negIDX,1)));
+catch
+   disp('Something wrong here'); 
+   return 
+end
+if isempty(cell2mat(peakData(posIDX,1)))
+    val = 2;
+end
+if isempty(cell2mat(peakData(negIDX,1)))
+    val = 1;
+end
 try
     if val ~=3
-        allPeaks = uniquePeaks(peakData,parameters);
+        if isempty(cell2mat(peakData))
+            failedProcess(handles)
+            errorlg('No peaks detected at chosen polarity');
+        else
+            allPeaks = uniquePeaks(peakData,parameters);
+        end
     else
-        for j = 1:2
-            posIDX = 1:length(peakData)/2;
-            negIDX = (length(peakData)/2)+1:length(peakData);
+        for j = 1:2           
             if j == 1
                 allPeaks{j} = uniquePeaks(peakData(posIDX,1),parameters);
             else
@@ -65,13 +89,13 @@ try
             end
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
 
 % Remove isotopes from peak list
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     if val ~= 3
         allPeaks = deisotope(allPeaks);
@@ -80,13 +104,13 @@ try
            allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
 
 % Subtract background peaks if file provided
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     if ~isempty(parameters.backgroundSpectrum)
        if val ~= 3
@@ -97,14 +121,14 @@ try
           end
        end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     intensityMatrix = []; orginalMatrix = []; originalPeaks = [];
     if val ~= 3
@@ -126,23 +150,23 @@ try
             end
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
    failedProcess(handles); 
 end
 
 % Export orginal peaks and m/z to Excel file
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     warning off
     try
         if isempty(parameters.name)
-           exportName = [datestr(datetime,'YYYYMMDDhhmmss') '_allPeaks'];
+           exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_allPeaks'];
         else
            exportName = parameters.name;
         end
     catch
-        exportName = [datestr(datetime,'YYYYMMDDhhmmss') '_allPeaks'];
+        exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_allPeaks'];
     end
     if val ~= 3
         % Remove file names from spectra without peaks
@@ -179,13 +203,13 @@ try
             end
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
 
 % Filter variables below threshold abundance and impute remaining missing values
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     allowedMissing = 0.2;
     if val ~= 3
@@ -224,25 +248,23 @@ try
             matOut{j} = tempMat;
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
    failedProcess(handles); 
 end
 
 % Export matrix to an Excel file
+processVal = processVal+1;
+updateProcess(processVal,handles);
 try
     try
         if isempty(parameters.name)
-           exportName = [datestr(datetime,'YYYYMMDDhhmmss') '_output'];
+           exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_output'];
         else
            exportName = parameters.name;
         end
     catch
-        exportName = [datestr(datetime,'YYYYMMDDhhmmss') '_output'];
+        exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_output'];
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 
     if val ~= 3
         % Remove file names from spectra without peaks
@@ -279,11 +301,12 @@ try
             end
         end
     end
-    processVal = processVal+1;
-    updateProcess(processVal,handles);
 catch
     failedProcess(handles);
 end
+
+processVal = processVal+1;
+updateProcess(processVal,handles);
 
 end
 
