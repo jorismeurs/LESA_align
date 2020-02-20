@@ -3,7 +3,7 @@ function mzXMLFiles = convertRaw(Path,Files)
    % Determine file type
    fileExtLoc = find(Files{1}=='.');
    fileExt = Files{1}(fileExtLoc+1:end);
-   
+
    % No conversion needed when files are mzXML
    if isequal(fileExt,'mzXML')
        %cd(Path);
@@ -14,8 +14,8 @@ function mzXMLFiles = convertRaw(Path,Files)
    % Convert RAW to mzXML
    elseif isequal(fileExt,'raw')
        rawFiles = fullfile(Path,Files);
-       for j = 1:length(rawFiles)
-          system('cd C:\ProteoWizard\');
+       currentFolder = cd('C:\ProteoWizard\'); 
+       for j = 1:length(rawFiles)        
           system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' Path]);
        end
        %cd(Path);
@@ -27,6 +27,7 @@ function mzXMLFiles = convertRaw(Path,Files)
            disp(tempName);
            mzXMLFiles = [mzXMLFiles;{tempName}];
        end
-       %cd([userpath '\LESA_align-master\src']);
+       cd(currentFolder);
    end
+   
 end
