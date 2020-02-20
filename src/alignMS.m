@@ -11,7 +11,7 @@ function alignMS(parameters,handles)
 
 % Initiate process
 processVal = 0;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 
 % Check validity of input parameters from GUI
 processVal = processVal+1;
