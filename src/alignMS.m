@@ -15,7 +15,7 @@ updateProcess(processVal,handles);
 
 % Check validity of input parameters from GUI
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     validateInput(parameters);
 catch
@@ -24,7 +24,7 @@ end
 
 % Browse for files
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
     'MultiSelect','on');
@@ -38,7 +38,7 @@ end
 
 % Convert .RAW files
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     mzxmlFiles = convertRaw(PathName,FileName);
 catch
@@ -47,7 +47,7 @@ end
 
 % Retrieve peaklist per file
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
 catch
@@ -57,7 +57,7 @@ end
 
 % Generate unique peak matrix
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 
 
 % Change processing value if polarity data is completely missing 
@@ -97,7 +97,7 @@ end
 
 % Remove isotopes from peak list
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     if val ~= 3
         allPeaks = deisotope(allPeaks);
@@ -112,7 +112,7 @@ end
 
 % Subtract background peaks if file provided
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     if ~isempty(parameters.backgroundSpectrum)
        if val ~= 3
@@ -130,7 +130,7 @@ end
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     intensityMatrix = []; orginalMatrix = []; originalPeaks = [];
     if val ~= 3
@@ -158,7 +158,7 @@ end
 
 % Export orginal peaks and m/z to Excel file
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     warning off
     try
@@ -211,7 +211,7 @@ end
 
 % Filter variables below threshold abundance and impute remaining missing values
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     allowedMissing = 0.2;
     if val ~= 3
@@ -256,7 +256,7 @@ end
 
 % Export matrix to an Excel file
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 try
     try
         if isempty(parameters.name)
@@ -308,7 +308,7 @@ catch
 end
 
 processVal = processVal+1;
-updateProcess(process,handles);
+updateProcess(processVal,handles);
 
 end
 
