@@ -1,5 +1,7 @@
 function varargout = LESA_align(varargin)
 % Tool for alignment of direct infusion type mass spectrometry data
+% Copyright (c) 2020 Joris Meurs, MSc
+% All rights reserved
 
 % Last Modified by GUIDE v2.5 18-Feb-2020 15:41:54
 

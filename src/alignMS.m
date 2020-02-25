@@ -2,12 +2,22 @@
 %
 % (c) Joris Meurs, MSc (2020)
 
+% Store FileNames for re-processing
+% Hide axes numbers on start-up
+% Check the use of spaces for ProteoWizard
+% Log output
+% Place waitbar next to GUI
+
 function alignMS(parameters,handles) 
 % parameters.minMZ = 70;
 % parameters.maxMZ = 1050;
 % parameters.tolerance = 5;
 % parameters.threshold = 10000;
 % parameters.polarity = 3;
+
+% if isfile('log.txt')
+%    delete('log.txt'); 
+% end
 
 % Initiate process
 processVal = 0;
@@ -20,39 +30,45 @@ try
     validateInput(parameters);
 catch
     failedProcess(handles);
+    return
 end
 
 % Browse for files
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
+% try
     [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
     'MultiSelect','on');
     if isequal(FileName, 0)
         failedProcess(handles);
         return
     end 
-catch
-   failedProcess(handles); 
-end
+% catch
+%    failedProcess(handles);
+%    return
+% end
+
+diary([PathName '\log.txt']);
 
 % Convert .RAW files
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-    mzxmlFiles = convertRaw(PathName,FileName);
-catch
-   failedProcess(handles); 
-end
+% try
+    mzxmlFiles = convertRaw(PathName,FileName,parameters);
+% catch
+%    failedProcess(handles);
+%    return
+% end
 
 % Retrieve peaklist per file
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
+% try
     [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-catch
-    failedProcess(handles);
-end
+% catch
+%     failedProcess(handles);
+%     return
+% end
 
 
 % Generate unique peak matrix
@@ -74,11 +90,12 @@ if val == 3
     end
 end
 
-try
+%try
     if val ~=3
         if isempty(cell2mat(peakData))
             failedProcess(handles)
-            errorlg('No peaks detected at chosen polarity');
+            errordlg('No peaks detected at chosen polarity');
+            return
         else
             allPeaks = uniquePeaks(peakData,parameters);
         end
@@ -91,14 +108,14 @@ try
             end
         end
     end
-catch
-    failedProcess(handles);
-end
+% catch
+%     failedProcess(handles);
+% end
 
 % Remove isotopes from peak list
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
+%try
     if val ~= 3
         allPeaks = deisotope(allPeaks);
     else
@@ -106,15 +123,16 @@ try
            allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
         end
     end
-catch
-    failedProcess(handles);
-end
+%catch
+    %failedProcess(handles);
+%end
 
-% Subtract background peaks if file provided
+% Remove background peaks if file provided
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-    if ~isempty(parameters.backgroundSpectrum)
+if ~isempty(parameters.backgroundSpectrum)
+    
+    %try
        if val ~= 3
            allPeaks = subtractBackground(allPeaks,parameters);
        else
@@ -122,17 +140,18 @@ try
              allPeaks{j} = subtractBackground(cell2mat(allPeaks(j)),parameters,j); 
           end
        end
-    end
-catch
-    failedProcess(handles);
+    %catch 
+%        failedProcess(handles);
+%        return 
+%     end
 end
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-    intensityMatrix = []; orginalMatrix = []; originalPeaks = [];
+%try
+    intensityMatrix = []; originalMatrix = []; originalPeaks = [];
     if val ~= 3
         [intensityMatrix,emptyIDX] = generateIntensityMatrix(allPeaks,peakData,parameters);
         originalMatrix = intensityMatrix;
@@ -152,14 +171,16 @@ try
             end
         end
     end
-catch
-   failedProcess(handles); 
-end
+% catch
+%    failedProcess(handles); 
+%    return
+% end
 
 % Export orginal peaks and m/z to Excel file
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
+size(originalMatrix)
+%try
     warning off
     try
         if isempty(parameters.name)
@@ -175,9 +196,13 @@ try
         if ~isempty(emptyIDX)
            FileName(emptyIDX) = [];
         end
-        xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
-        xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
-        xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
+        tempData = [];
+        tempData = [FileName',num2cell(originalMatrix)];
+        tempData = [num2cell([NaN,originalPeaks']);tempData];
+        save([PathName '\' exportName '.mat'],'tempData');
+        %xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
+        %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
+        %xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
     else
         % Create separate file name cell arrays in case for one polarity peaks
         % are missing
@@ -191,28 +216,37 @@ try
                    emptyIDXPos = cell2mat(emptyIDX(j)); 
                    FileNamePos(emptyIDXPos) = [];
                 end
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
+                tempData = [];
+                tempData = [FileNamePos',num2cell(tempMat)];
+                tempData = [num2cell([NaN,tempPeaks']);tempData];
+                save([PathName '\' exportName '_pos.mat'],'tempData');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
             else
                 if ~isempty(emptyIDX)
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
                    FileNameNeg(emptyIDXNeg) = [];
                 end
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
+                tempData = [];
+                tempData = [FileNameNeg',num2cell(tempMat)];
+                tempData = [num2cell([NaN,tempPeaks']);tempData];
+                save([PathName '\' exportName '_neg.mat'],'tempData');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
             end
         end
     end
-catch
-    failedProcess(handles);
-end
+% catch
+%     failedProcess(handles);
+%     return
+% end
 
 % Filter variables below threshold abundance and impute remaining missing values
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
+%try
     allowedMissing = 0.2;
     if val ~= 3
         c = [];
@@ -250,32 +284,37 @@ try
             matOut{j} = tempMat;
         end
     end
-catch
-   failedProcess(handles); 
-end
+% catch
+%    failedProcess(handles); 
+%    return
+% end
 
 % Export matrix to an Excel file
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-    try
+%try
+    %try
         if isempty(parameters.name)
-           exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_output'];
+           exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
         else
            exportName = parameters.name;
         end
-    catch
-        exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_output'];
-    end
+    %catch
+    %    exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
+    %end
 
     if val ~= 3
         % Remove file names from spectra without peaks
         if ~isempty(emptyIDX)
            FileName(emptyIDX) = [];
         end
-        xlswrite([PathName '\' exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
-        xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
-        xlswrite([PathName '\' exportName '.xlsx'],allPeaks','Sheet1','B1');
+        tempData = [];
+        tempData = [FileName',num2cell(intensityMatrix)];
+        tempData = [num2cell([NaN,allPeaks']);tempData];
+        save([PathName '\' exportName '.mat'],'tempData');
+        %xlswrite([PathName '\' exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
+        %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
+        %xlswrite([PathName '\' exportName '.xlsx'],allPeaks','Sheet1','B1');
     else
         % Create separate file name cell arrays in case for one polarity peaks
         % are missing
@@ -289,23 +328,32 @@ try
                    emptyIDXPos = cell2mat(emptyIDX(j)); 
                    FileNamePos(emptyIDXPos) = [];
                 end
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
+                tempData = [];
+                tempData = [FileNamePos',num2cell(tempMat)];
+                tempData = [num2cell([NaN,tempPeaks']);tempData];
+                save([PathName '\' exportName '_pos.mat'],'tempData');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
             else
                 if ~isempty(emptyIDX)
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
                    FileNameNeg(emptyIDXNeg) = [];
                 end
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
+                tempData = [];
+                tempData = [FileNameNeg',num2cell(tempMat)];
+                tempData = [num2cell([NaN,tempPeaks']);tempData];
+                save([PathName '\' exportName '_neg.mat'],'tempData');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
             end
         end
     end
-catch
-    failedProcess(handles);
-end
+% catch
+%     failedProcess(handles);
+%     return
+% end
 
 processVal = processVal+1;
 updateProcess(processVal,handles);
