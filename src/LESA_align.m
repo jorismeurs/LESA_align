@@ -3,7 +3,7 @@ function varargout = LESA_align(varargin)
 % Copyright (c) 2020 Joris Meurs, MSc
 % All rights reserved
 
-% Last Modified by GUIDE v2.5 18-Feb-2020 15:41:54
+% Last Modified by GUIDE v2.5 26-Feb-2020 10:26:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -37,6 +37,9 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
+axes(handles.axes1);
+set(gca,'XTick',[],'YTick',[]);
+rectangle('Position',[0 0 1 1]);
 set(handles.figure1,'Name','LESA Alignment Tool');
 handles.processNames = {
     'Validating parameters'
@@ -52,9 +55,6 @@ handles.processNames = {
     'Exporting filtered matrix....'
     'Finished'
     };
-axes(handles.axes1);
-set(gca,'XTick',[],'YTick',[]);
-rectangle('Position',[0 0 1 1]);
 
 guidata(hObject, handles);
 
@@ -262,3 +262,26 @@ if isequal(FileName,0)
     return
 end
 set(handles.backgroundSpectrum,'String',fullfile(PathName,FileName));
+
+
+% --- Executes on selection change in commandWindow.
+function commandWindow_Callback(hObject, eventdata, handles)
+% hObject    handle to commandWindow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns commandWindow contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from commandWindow
+
+
+% --- Executes during object creation, after setting all properties.
+function commandWindow_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to commandWindow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

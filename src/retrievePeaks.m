@@ -9,7 +9,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
    peakList = []; peakListPos = []; peakListNeg = [];
    wb = waitbar(0,sprintf('Peak picking'));
    set(findall(wb),'Units', 'normalized');
-   set(wb,'Position', [0.5 0.5 0.2 0.2]);   
+   set(wb,'Position', [0.215 0.55 0.2 0.2]);   
    
    % Parse files
    for j = 1:length(files)

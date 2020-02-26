@@ -2,10 +2,8 @@
 %
 % (c) Joris Meurs, MSc (2020)
 
-% Store FileNames for re-processing
 % Hide axes numbers on start-up
 % Check the use of spaces for ProteoWizard
-% Log output
 % Place waitbar next to GUI
 
 function alignMS(parameters,handles) 
@@ -15,9 +13,9 @@ function alignMS(parameters,handles)
 % parameters.threshold = 10000;
 % parameters.polarity = 3;
 
-% if isfile('log.txt')
-%    delete('log.txt'); 
-% end
+commandFile = [datestr(datetime('now'),'yyyymmddHHMMSS') '.txt'];
+diary(commandFile);
+diary on
 
 % Initiate process
 processVal = 0;
@@ -28,54 +26,102 @@ processVal = processVal+1;
 updateProcess(processVal,handles);
 try
     validateInput(parameters);
-catch
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
     failedProcess(handles);
     return
 end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Browse for files
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-% try
+try
     [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
     'MultiSelect','on');
     if isequal(FileName, 0)
         failedProcess(handles);
         return
     end 
-% catch
-%    failedProcess(handles);
-%    return
-% end
-
-diary([PathName '\log.txt']);
+catch exception
+   disp(exception.message);
+   if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+   diary off
+   commandOutput = fileread(commandFile);
+   set(handles.commandWindow,'String',commandOutput);
+   delete(commandFile);
+   failedProcess(handles);
+   return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Convert .RAW files
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-% try
+try
     mzxmlFiles = convertRaw(PathName,FileName,parameters);
-% catch
-%    failedProcess(handles);
-%    return
-% end
+catch exception
+   disp(exception.message); 
+   if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+   diary off
+   commandOutput = fileread(commandFile);
+   set(handles.commandWindow,'String',commandOutput);
+   delete(commandFile);
+   failedProcess(handles);
+   return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Retrieve peaklist per file
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-% try
+try
     [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-% catch
-%     failedProcess(handles);
-%     return
-% end
-
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
+    failedProcess(handles);
+    return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Generate unique peak matrix
 processVal = processVal+1;
 updateProcess(processVal,handles);
 
-
+diary on
 % Change processing value if polarity data is completely missing 
 if val == 3
     negIDX = (length(peakData)/2)+1:length(peakData);
@@ -89,8 +135,12 @@ if val == 3
         peakData = peakData(posIDX,1);
     end
 end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
-%try
+diary on
+try
     if val ~=3
         if isempty(cell2mat(peakData))
             failedProcess(handles)
@@ -108,14 +158,28 @@ end
             end
         end
     end
-% catch
-%     failedProcess(handles);
-% end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
+    failedProcess(handles);
+    return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Remove isotopes from peak list
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-%try
+try
     if val ~= 3
         allPeaks = deisotope(allPeaks);
     else
@@ -123,16 +187,30 @@ updateProcess(processVal,handles);
            allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
         end
     end
-%catch
-    %failedProcess(handles);
-%end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    failedProcess(handles);
+    delete(commandFile);
+    return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Remove background peaks if file provided
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 if ~isempty(parameters.backgroundSpectrum)
     
-    %try
+    try
        if val ~= 3
            allPeaks = subtractBackground(allPeaks,parameters);
        else
@@ -140,17 +218,30 @@ if ~isempty(parameters.backgroundSpectrum)
              allPeaks{j} = subtractBackground(cell2mat(allPeaks(j)),parameters,j); 
           end
        end
-    %catch 
-%        failedProcess(handles);
-%        return 
-%     end
+    catch exception
+          disp(exception.message);
+          if size(exception,1) > 0
+                fprintf('File: %s \n',exception.stack.name);
+                fprintf('Line no.: %d \n',exception.stack.line);
+          end
+          diary off
+          commandOutput = fileread(commandFile);
+          set(handles.commandWindow,'String',commandOutput);  
+          failedProcess(handles);
+          delete(commandFile);
+          return 
+    end
 end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-%try
+try
     intensityMatrix = []; originalMatrix = []; originalPeaks = [];
     if val ~= 3
         [intensityMatrix,emptyIDX] = generateIntensityMatrix(allPeaks,peakData,parameters);
@@ -171,16 +262,28 @@ updateProcess(processVal,handles);
             end
         end
     end
-% catch
-%    failedProcess(handles); 
-%    return
-% end
+catch exception
+   disp(exception.message);
+   if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+   end
+   diary off
+   commandOutput = fileread(commandFile);
+   set(handles.commandWindow,'String',commandOutput);
+   failedProcess(handles); 
+   delete(commandFile);
+   return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Export orginal peaks and m/z to Excel file
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-size(originalMatrix)
-%try
+try
     warning off
     try
         if isempty(parameters.name)
@@ -200,9 +303,9 @@ size(originalMatrix)
         tempData = [FileName',num2cell(originalMatrix)];
         tempData = [num2cell([NaN,originalPeaks']);tempData];
         save([PathName '\' exportName '.mat'],'tempData');
-        %xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
-        %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
-        %xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
+        xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
+        xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
+        xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
     else
         % Create separate file name cell arrays in case for one polarity peaks
         % are missing
@@ -220,9 +323,9 @@ size(originalMatrix)
                 tempData = [FileNamePos',num2cell(tempMat)];
                 tempData = [num2cell([NaN,tempPeaks']);tempData];
                 save([PathName '\' exportName '_pos.mat'],'tempData');
-                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
-                %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
-                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
+                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
+                xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
+                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
             else
                 if ~isempty(emptyIDX)
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
@@ -232,21 +335,34 @@ size(originalMatrix)
                 tempData = [FileNameNeg',num2cell(tempMat)];
                 tempData = [num2cell([NaN,tempPeaks']);tempData];
                 save([PathName '\' exportName '_neg.mat'],'tempData');
-                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
-                %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
-                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
+                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
+                xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
+                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
             end
         end
     end
-% catch
-%     failedProcess(handles);
-%     return
-% end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    failedProcess(handles);
+    delete(commandFile);
+    return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Filter variables below threshold abundance and impute remaining missing values
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-%try
+try
     allowedMissing = 0.2;
     if val ~= 3
         c = [];
@@ -284,24 +400,38 @@ updateProcess(processVal,handles);
             matOut{j} = tempMat;
         end
     end
-% catch
-%    failedProcess(handles); 
-%    return
-% end
+catch exception
+   disp(exception.message);
+   if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+   end
+   diary off
+   commandOutput = fileread(commandFile);
+   set(handles.commandWindow,'String',commandOutput); 
+   delete(commandFile);
+   failedProcess(handles); 
+   delete(commandFile);
+   return
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Export matrix to an Excel file
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-%try
-    %try
+try
+    try
         if isempty(parameters.name)
            exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
         else
            exportName = parameters.name;
         end
-    %catch
-    %    exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
-    %end
+    catch
+       exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
+    end
 
     if val ~= 3
         % Remove file names from spectra without peaks
@@ -350,13 +480,27 @@ updateProcess(processVal,handles);
             end
         end
     end
-% catch
-%     failedProcess(handles);
-%     return
-% end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    failedProcess(handles);
+    delete(commandFile);
+    return
+end
+fprintf('No errors \n');
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 processVal = processVal+1;
 updateProcess(processVal,handles);
+delete(commandFile);
 
 end
 
