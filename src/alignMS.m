@@ -2,10 +2,6 @@
 %
 % (c) Joris Meurs, MSc (2020)
 
-% Hide axes numbers on start-up
-% Check the use of spaces for ProteoWizard
-% Place waitbar next to GUI
-
 function alignMS(parameters,handles) 
 % parameters.minMZ = 70;
 % parameters.maxMZ = 1050;
@@ -13,8 +9,7 @@ function alignMS(parameters,handles)
 % parameters.threshold = 10000;
 % parameters.polarity = 3;
 
-commandFile = [datestr(datetime('now'),'yyyymmddHHMMSS') '.txt'];
-diary(commandFile);
+
 diary on
 
 % Initiate process
@@ -32,24 +27,26 @@ catch exception
         fprintf('File: %s \n',exception.stack.name);
         fprintf('Line no.: %d \n',exception.stack.line);
     end
-    diary off
-    commandOutput = fileread(commandFile);
-    set(handles.commandWindow,'String',commandOutput);
-    delete(commandFile);
+%     diary off
+%     commandOutput = fileread(commandFile);
+%     set(handles.commandWindow,'String',commandOutput);
+%     delete(commandFile);
     failedProcess(handles);
     return
 end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
+% diary off
+% commandOutput = fileread(commandFile);
+% set(handles.commandWindow,'String',commandOutput);
 
 % Browse for files
-diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
     [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
     'MultiSelect','on');
+    commandFile = [PathName '\' datestr(datetime('now'),'yyyymmddHHMMSS') '.txt'];
+    diary(commandFile);
+    diary on
     if isequal(FileName, 0)
         failedProcess(handles);
         return
