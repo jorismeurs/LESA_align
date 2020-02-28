@@ -82,7 +82,7 @@ function samplePeaks = subtractBackground(peakList,parameters,iteration)
                    includedScans = [includedScans;posIdx(n)];
                 end
              end
-             totalPeaks = cell2mat(peakList(iteration));
+             totalPeaks = peakList;
         elseif iteration == 2
              negIdx = [];
              for n = 1:length(msStruct.scan)
@@ -97,7 +97,7 @@ function samplePeaks = subtractBackground(peakList,parameters,iteration)
                    includedScans = [includedScans;negIdx(n)];
                 end
              end
-             totalPeaks = cell2mat(peakList(iteration));
+             totalPeaks = peakList;
         end
     end
     

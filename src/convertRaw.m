@@ -22,24 +22,24 @@ function mzXMLFiles = convertRaw(Path,Files,parameters)
           system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' Path]);
        end
        cd(Path);
-       mzXMLList = dir('*.mzXML');
-       mzXMLFiles = [];
-       for j = 1:length(mzXMLList)
-           mzXMLFiles{j} = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
-       end
-       if ~isempty(backgroundSpectrum)
-           remove = find(contains(mzXMLFiles,backgroundSpectrum));
-           mzXMLFiles(remove) = [];
-       end
-%        for j = 1:length(rawFiles)
-%            fileExtLoc = find(Files{j}=='.');
-%            tempName = fullfile(Path,[Files{j}(1:fileExtLoc) 'mzXML']);
-%            disp(tempName);
-%            mzXMLFiles = [mzXMLFiles;{tempName}];
+%        mzXMLList = dir('*.mzXML');
+        mzXMLFiles = [];
+%        for j = 1:length(mzXMLList)
+%            mzXMLFiles{j} = fullfile(mzXMLList(j).folder,mzXMLList(j).name);
 %        end
+%        if ~isempty(backgroundSpectrum)
+%            remove = find(contains(mzXMLFiles,backgroundSpectrum));
+%            mzXMLFiles(remove) = [];
+%        end
+       for j = 1:length(rawFiles)
+           fileExtLoc = find(Files{j}=='.');
+           tempName = fullfile(Path,[Files{j}(1:fileExtLoc) 'mzXML']);
+           disp(tempName);
+           mzXMLFiles = [mzXMLFiles;{tempName}];
+       end
        cd(currentFolder);
    elseif isequal(fileExt,'txt')
       mzXMLFiles = fullfile(Path,Files); 
    end
-   
+   cd(Path);
 end

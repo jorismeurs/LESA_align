@@ -1,6 +1,9 @@
 % Functionality behind LESA_align GUI for processing .RAW files
 %
 % (c) Joris Meurs, MSc (2020)
+%
+% Write to .CSV
+%
 
 function alignMS(parameters,handles) 
 % parameters.minMZ = 70;
@@ -9,10 +12,12 @@ function alignMS(parameters,handles)
 % parameters.threshold = 10000;
 % parameters.polarity = 3;
 
-
-diary on
-
 % Initiate process
+try
+    delete('log.txt');
+catch exception
+    disp(exception.message);
+end
 processVal = 0;
 updateProcess(processVal,handles);
 
@@ -31,42 +36,43 @@ catch exception
 %     commandOutput = fileread(commandFile);
 %     set(handles.commandWindow,'String',commandOutput);
 %     delete(commandFile);
-    failedProcess(handles);
+%     failedProcess(handles);
     return
 end
-% diary off
-% commandOutput = fileread(commandFile);
-% set(handles.commandWindow,'String',commandOutput);
+%diary off
+%commandOutput = fileread(commandFile);
+%set(handles.commandWindow,'String',commandOutput);
 
 % Browse for files
 processVal = processVal+1;
 updateProcess(processVal,handles);
-try
-    [FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
-    'MultiSelect','on');
-    commandFile = [PathName '\' datestr(datetime('now'),'yyyymmddHHMMSS') '.txt'];
-    diary(commandFile);
-    diary on
-    if isequal(FileName, 0)
-        failedProcess(handles);
-        return
-    end 
-catch exception
-   disp(exception.message);
-   if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-   diary off
-   commandOutput = fileread(commandFile);
-   set(handles.commandWindow,'String',commandOutput);
-   delete(commandFile);
-   failedProcess(handles);
-   return
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
+
+%try
+[FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
+'MultiSelect','on');
+if isequal(FileName, 0)
+    failedProcess(handles);
+    return
+end 
+commandFile = [PathName '\log.txt'];
+diary(commandFile);
+%diary on
+%catch exception
+%    disp(exception.message);
+%    if size(exception,1) > 0
+%         fprintf('File: %s \n',exception.stack.name);
+%         fprintf('Line no.: %d \n',exception.stack.line);
+%     end
+%    diary off
+%    commandOutput = fileread(commandFile);
+%    set(handles.commandWindow,'String',commandOutput);
+%    delete(commandFile);
+%   failedProcess(handles);
+%   return
+%end
+%diary off
+%commandOutput = fileread(commandFile);
+%set(handles.commandWindow,'String',commandOutput);
 
 % Convert .RAW files
 diary on
@@ -286,9 +292,10 @@ try
         if isempty(parameters.name)
            exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_allPeaks'];
         else
-           exportName = parameters.name;
+           exportName = [parameters.name '_allPeaks'];
         end
-    catch
+    catch exception
+        disp(exception.message);
         exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_allPeaks'];
     end
     if val ~= 3
@@ -300,9 +307,9 @@ try
         tempData = [FileName',num2cell(originalMatrix)];
         tempData = [num2cell([NaN,originalPeaks']);tempData];
         save([PathName '\' exportName '.mat'],'tempData');
-        xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
-        xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
-        xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
+        %xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
+        %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
+        %xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
     else
         % Create separate file name cell arrays in case for one polarity peaks
         % are missing
@@ -320,9 +327,9 @@ try
                 tempData = [FileNamePos',num2cell(tempMat)];
                 tempData = [num2cell([NaN,tempPeaks']);tempData];
                 save([PathName '\' exportName '_pos.mat'],'tempData');
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
             else
                 if ~isempty(emptyIDX)
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
@@ -332,9 +339,9 @@ try
                 tempData = [FileNameNeg',num2cell(tempMat)];
                 tempData = [num2cell([NaN,tempPeaks']);tempData];
                 save([PathName '\' exportName '_neg.mat'],'tempData');
-                xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
-                xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
-                xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
+                %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
+                %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
             end
         end
     end
@@ -424,7 +431,7 @@ try
         if isempty(parameters.name)
            exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
         else
-           exportName = parameters.name;
+           exportName = [parameters.name '_MVA'];
         end
     catch
        exportName = [datestr(datetime('now'),'yyyymmddHHMMSS') '_MVA'];
