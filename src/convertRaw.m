@@ -17,11 +17,11 @@ function mzXMLFiles = convertRaw(Path,Files,parameters)
    % Convert RAW to mzXML
    elseif isequal(fileExt,'raw')
        rawFiles = fullfile(Path,Files);
-       currentFolder = cd('C:\ProteoWizard\'); 
-       for j = 1:length(rawFiles)        
+       system('cd C:\ProteoWizard'); 
+       for j = 1:length(rawFiles)           
           system(['msconvert ' rawFiles{j} ' --mzXML --32 -o ' Path]);
        end
-       cd(Path);
+       %cd(Path);
 %        mzXMLList = dir('*.mzXML');
         mzXMLFiles = [];
 %        for j = 1:length(mzXMLList)
@@ -37,9 +37,9 @@ function mzXMLFiles = convertRaw(Path,Files,parameters)
            disp(tempName);
            mzXMLFiles = [mzXMLFiles;{tempName}];
        end
-       cd(currentFolder);
+       %cd(currentFolder);
    elseif isequal(fileExt,'txt')
       mzXMLFiles = fullfile(Path,Files); 
    end
-   cd(Path);
+   %cd(Path);
 end

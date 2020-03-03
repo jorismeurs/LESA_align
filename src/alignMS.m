@@ -303,10 +303,12 @@ try
         if ~isempty(emptyIDX)
            FileName(emptyIDX) = [];
         end
-        tempData = [];
-        tempData = [FileName',num2cell(originalMatrix)];
-        tempData = [num2cell([NaN,originalPeaks']);tempData];
-        save([PathName '\' exportName '.mat'],'tempData');
+        %tempData = [];
+        %tempData = [FileName',num2cell(originalMatrix)];
+        %tempData = [num2cell([NaN,originalPeaks']);tempData];
+        %save([PathName '\' exportName '.mat'],'tempData');
+        size(FileName)
+        writeOutput(originalMatrix,originalPeaks,FileName,exportName,PathName,1);
         %xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
         %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
         %xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
@@ -323,10 +325,10 @@ try
                    emptyIDXPos = cell2mat(emptyIDX(j)); 
                    FileNamePos(emptyIDXPos) = [];
                 end
-                tempData = [];
-                tempData = [FileNamePos',num2cell(tempMat)];
-                tempData = [num2cell([NaN,tempPeaks']);tempData];
-                save([PathName '\' exportName '_pos.mat'],'tempData');
+                %tempData = [];
+                %tempData = [FileNamePos',num2cell(tempMat)];
+                %tempData = [num2cell([NaN,tempPeaks']);tempData];
+                writeOutput(tempMat,tempPeaks,FileNamePos,exportName,PathName,2);
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
@@ -335,10 +337,10 @@ try
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
                    FileNameNeg(emptyIDXNeg) = [];
                 end
-                tempData = [];
-                tempData = [FileNameNeg',num2cell(tempMat)];
-                tempData = [num2cell([NaN,tempPeaks']);tempData];
-                save([PathName '\' exportName '_neg.mat'],'tempData');
+                %tempData = [];
+                %tempData = [FileNameNeg',num2cell(tempMat)];
+                %tempData = [num2cell([NaN,tempPeaks']);tempData];
+                writeOutput(tempMat,tempPeaks,FileNameNeg,exportName,PathName,3);
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
@@ -366,6 +368,7 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
+disp(val);
 try
     allowedMissing = 0.2;
     if val ~= 3
@@ -385,15 +388,16 @@ try
     else
         peakOut = []; matOut = [];
         for j = 1:2
-            c = [];
+            c = []; tempMat = []; tempPeaks = [];
             tempMat = cell2mat(intensityMatrix(j));
             tempPeaks = cell2mat(allPeaks(j));
             for n = 1:size(tempMat,2) 
-                idx = find(tempMat(:,j)==0);
+                idx = find(tempMat(:,n)==0);
                 if numel(idx) > ceil(allowedMissing*size(tempMat,1)) 
-                    c = [c;j];
+                    c = [c;n];
                 end
             end 
+            numel(c)
             tempMat(:,c) = [];
             tempPeaks(c,:) = [];
             tempMat(tempMat==0) = NaN;
@@ -442,10 +446,10 @@ try
         if ~isempty(emptyIDX)
            FileName(emptyIDX) = [];
         end
-        tempData = [];
-        tempData = [FileName',num2cell(intensityMatrix)];
-        tempData = [num2cell([NaN,allPeaks']);tempData];
-        save([PathName '\' exportName '.mat'],'tempData');
+        %tempData = [];
+        %tempData = [FileName',num2cell(intensityMatrix)];
+        %tempData = [num2cell([NaN,allPeaks']);tempData];
+        writeOutput(intensityMatrix,allPeaks,FileName,exportName,PathName,1);
         %xlswrite([PathName '\' exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
         %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
         %xlswrite([PathName '\' exportName '.xlsx'],allPeaks','Sheet1','B1');
@@ -462,10 +466,10 @@ try
                    emptyIDXPos = cell2mat(emptyIDX(j)); 
                    FileNamePos(emptyIDXPos) = [];
                 end
-                tempData = [];
-                tempData = [FileNamePos',num2cell(tempMat)];
-                tempData = [num2cell([NaN,tempPeaks']);tempData];
-                save([PathName '\' exportName '_pos.mat'],'tempData');
+                %tempData = [];
+                %tempData = [FileNamePos',num2cell(tempMat)];
+                %tempData = [num2cell([NaN,tempPeaks']);tempData];
+                writeOutput(tempMat,tempPeaks,FileNamePos,exportName,PathName,2);
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
@@ -474,10 +478,10 @@ try
                    emptyIDXNeg = cell2mat(emptyIDX(j)); 
                    FileNameNeg(emptyIDXNeg) = [];
                 end
-                tempData = [];
-                tempData = [FileNameNeg',num2cell(tempMat)];
-                tempData = [num2cell([NaN,tempPeaks']);tempData];
-                save([PathName '\' exportName '_neg.mat'],'tempData');
+                %tempData = [];
+                %tempData = [FileNameNeg',num2cell(tempMat)];
+                %tempData = [num2cell([NaN,tempPeaks']);tempData];
+                writeOutput(tempMat,tempPeaks,FileNameNeg,exportName,PathName,3);
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
