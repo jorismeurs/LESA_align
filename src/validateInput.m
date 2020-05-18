@@ -31,6 +31,12 @@ function validateInput(params)
        errordlg('Invalid scan range'); 
        return
     end
+    if params.intensitVal == 2
+       if params.threshold > 100 || params.threshold < 0
+          errordlg('Relative intensity should be between 0 and 100'); 
+          return 
+       end
+    end
     fprintf('******************** \n');
     fprintf('m/z tolerance: %d ppm \n',params.tolerance);
     fprintf('Height filter: %d \n',params.threshold);
