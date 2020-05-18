@@ -2,14 +2,15 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
 
    % Get parameters
    threshold = parameters.threshold;
+   intVal = parameters.intensityVal;
    processVal = parameters.polarity;
    minMZ = parameters.minMZ;
    maxMZ = parameters.maxMZ;
 
    peakList = []; peakListPos = []; peakListNeg = [];
    wb = waitbar(0,sprintf('Peak picking'));
-   set(findall(wb),'Units', 'normalized');
-   set(wb,'Position', [0.215 0.55 0.2 0.2]);   
+   %set(findall(wb),'Units', 'normalized');
+   %set(wb,'Position', [0.215 0.55 0.2 0.2]);   
    
    % Parse files
    for j = 1:length(files)
@@ -89,6 +90,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       if processVal == 1 || processVal == 2
          if ~isempty(includedScans) 
              includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
+             includedScans(1:10) = [];
              for n = 1:length(includedScans)
                 scanData = msStruct.scan(includedScans(n)).peaks.mz;
                 mz = scanData(1:2:end);
@@ -107,6 +109,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       else
          includedDataPos  = []; mzData = []; intData = []; interpolatedSpectra = [];
          if ~isempty(includedScansPos) 
+             includedScansPos(1:10) = [];
              for n = 1:length(includedScansPos)
                 scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
                 mz = scanData(1:2:end);
@@ -124,6 +127,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
          end
 
          if ~isempty(includedScansNeg) 
+             includedScansNeg(1:10) = [];
              includedDataNeg = []; mzData = []; intData = []; interpolatedSpectra = [];
              for n = 1:length(includedScansNeg)
                 scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
@@ -146,7 +150,12 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       % Perform peak picking
       if processVal == 1 || processVal == 2
           if ~isempty(averageY)
-              peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',threshold,'Denoising',false);
+              if intVal == 2
+                 thresholdVal = (theshold/100)*max(averageY); 
+              else
+                 thresholdVal = threshold; 
+              end
+              peakList{j,1} = mspeaks(mzChannels',averageY','HeightFilter',thresholdVal,'Denoising',false);
           else
               peakList{j,1} = [];
           end
