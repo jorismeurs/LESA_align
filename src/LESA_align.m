@@ -3,7 +3,7 @@ function varargout = LESA_align(varargin)
 % Copyright (c) 2020 Joris Meurs, MSc
 % All rights reserved
 
-% Last Modified by GUIDE v2.5 26-Feb-2020 10:26:58
+% Last Modified by GUIDE v2.5 18-May-2020 10:06:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,7 @@ handles.processNames = {
     'Exporting filtered matrix....'
     'Finished'
     };
+set(handles.absInt,'Value',1);
 
 guidata(hObject, handles);
 
@@ -85,6 +86,15 @@ parameters.tolerance = str2num(get(handles.massTolerance,'String'));
 parameters.name = get(handles.fileName,'String');
 parameters.polarity = get(handles.polaritySelection,'Value');
 parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
+parameters.outputVal = get(handles.outputType,'Value');
+if get(handles.absInt,'Value') == 1
+   parameters.intensityVal = 1;
+end
+if get(handles.relInt,'Value') == 1
+   parameters.intensityVal = 2; 
+end
+parameters.imputationType = get(handles.imputationSelect,'Value');
+
 axes(handles.axes1)
 patch([0 1 1 0],[0 0 1 1],[1 1 1]);
 alignMS(parameters,handles);
@@ -281,6 +291,82 @@ function commandWindow_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in outputType.
+function outputType_Callback(hObject, eventdata, handles)
+% hObject    handle to outputType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns outputType contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from outputType
+
+
+% --- Executes during object creation, after setting all properties.
+function outputType_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to outputType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in absInt.
+function absInt_Callback(hObject, eventdata, handles)
+% hObject    handle to absInt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of absInt
+selectVal = get(handles.absInt,'Value');
+if selectVal == 0
+   set(handles.relInt,'Value',1);
+end
+if selectVal == 1
+    set(handles.relInt,'Value',0);
+end
+
+% --- Executes on button press in relInt.
+function relInt_Callback(hObject, eventdata, handles)
+% hObject    handle to relInt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of relInt
+selectVal = get(handles.relInt,'Value');
+if selectVal == 0
+   set(handles.absInt,'Value',1);
+end
+if selectVal == 1
+    set(handles.absInt,'Value',0);
+end
+
+% --- Executes on selection change in imputationSelect.
+function imputationSelect_Callback(hObject, eventdata, handles)
+% hObject    handle to imputationSelect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns imputationSelect contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from imputationSelect
+
+
+% --- Executes during object creation, after setting all properties.
+function imputationSelect_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to imputationSelect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
