@@ -48,7 +48,9 @@ processVal = processVal+1;
 updateProcess(processVal,handles);
 
 %try
-[FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'},...
+[FileName, PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';...
+    '*.mzXML','mzXML Files (.mzXML)';...
+    '*.txt','OrbiSIMS Files (.txt)'},...
 'MultiSelect','on');
 if isequal(FileName, 0)
     failedProcess(handles);
@@ -79,7 +81,7 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    mzxmlFiles = convertRaw(PathName,FileName,parameters);
+    [mzxmlFiles,massSpec] = convertRaw(PathName,FileName,parameters);
 catch exception
    disp(exception.message); 
    if size(exception,1) > 0
@@ -98,11 +100,23 @@ commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
 
 % Retrieve peaklist per file
+disp(parameters.outputVal);
+if parameters.outputVal == 2
+   linearBinningSpectra(mzxmlFiles,parameters); 
+   %updateProcess(length(handles.processName),handles);
+   return 
+end
+
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
+    disp(massSpec);
+    if ~isequal(massSpec,'OrbiSIMS')
+        [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
+    else
+        [peakData,val] = retrieveSIMSPeaks(mzxmlFiles,parameters);
+    end
 catch exception
     disp(exception.message);
     if size(exception,1) > 0
@@ -307,8 +321,9 @@ try
         %tempData = [FileName',num2cell(originalMatrix)];
         %tempData = [num2cell([NaN,originalPeaks']);tempData];
         %save([PathName '\' exportName '.mat'],'tempData');
-        size(FileName)
         writeOutput(originalMatrix,originalPeaks,FileName,exportName,PathName,1);
+        tempExport = [originalPeaks';originalMatrix];
+        save([PathName exportName '.mat'],'tempExport');
         %xlswrite([PathName '\' exportName '.xlsx'],originalMatrix,'Sheet1','B2');
         %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
         %xlswrite([PathName '\' exportName '.xlsx'],originalPeaks','Sheet1','B1');
@@ -329,6 +344,8 @@ try
                 %tempData = [FileNamePos',num2cell(tempMat)];
                 %tempData = [num2cell([NaN,tempPeaks']);tempData];
                 writeOutput(tempMat,tempPeaks,FileNamePos,exportName,PathName,2);
+                tempExport = [tempPeaks';tempMat];
+                save([PathName exportName '_pos.mat'],'tempExport');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
@@ -341,6 +358,8 @@ try
                 %tempData = [FileNameNeg',num2cell(tempMat)];
                 %tempData = [num2cell([NaN,tempPeaks']);tempData];
                 writeOutput(tempMat,tempPeaks,FileNameNeg,exportName,PathName,3);
+                tempExport = [tempPeaks';tempMat];
+                save([PathName exportName '_neg.mat'],'tempExport');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
@@ -369,58 +388,62 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 disp(val);
-try
-    allowedMissing = 0.2;
-    if val ~= 3
-        c = [];
-        for j = 1:size(intensityMatrix,2) 
-            idx = find(intensityMatrix(:,j)==0);
-            if numel(idx) > ceil(allowedMissing*size(intensityMatrix,1)) 
-                c = [c;j];
-            end
-        end 
-        intensityMatrix(:,c) = [];
-        allPeaks(c,:) = [];
-        intensityMatrix(intensityMatrix==0) = NaN;
-        intensityMatrix = intensityMatrix';
-        intensityMatrix = knnimpute(intensityMatrix,10);  
-        intensityMatrix = intensityMatrix';
-    else
-        peakOut = []; matOut = [];
-        for j = 1:2
-            c = []; tempMat = []; tempPeaks = [];
-            tempMat = cell2mat(intensityMatrix(j));
-            tempPeaks = cell2mat(allPeaks(j));
-            for n = 1:size(tempMat,2) 
-                idx = find(tempMat(:,n)==0);
-                if numel(idx) > ceil(allowedMissing*size(tempMat,1)) 
-                    c = [c;n];
+if parameters.imputationType == 2
+    try
+        allowedMissing = 0.2;
+        if val ~= 3
+            c = [];
+            for j = 1:size(intensityMatrix,2) 
+                idx = find(intensityMatrix(:,j)==0);
+                if numel(idx) > ceil(allowedMissing*size(intensityMatrix,1)) 
+                    c = [c;j];
                 end
             end 
-            numel(c)
-            tempMat(:,c) = [];
-            tempPeaks(c,:) = [];
-            tempMat(tempMat==0) = NaN;
-            tempMat = tempMat';
-            tempMat = knnimpute(tempMat,10);
-            tempMat = tempMat';
-            peakOut{j} = tempPeaks;
-            matOut{j} = tempMat;
+            intensityMatrix(:,c) = [];
+            allPeaks(c,:) = [];
+            intensityMatrix(intensityMatrix==0) = NaN;
+            intensityMatrix = intensityMatrix';
+            intensityMatrix = knnimpute(intensityMatrix,10);  
+            intensityMatrix = intensityMatrix';
+        else
+            peakOut = []; matOut = [];
+            for j = 1:2
+                c = []; tempMat = []; tempPeaks = [];
+                tempMat = cell2mat(intensityMatrix(j));
+                tempPeaks = cell2mat(allPeaks(j));
+                for n = 1:size(tempMat,2) 
+                    idx = find(tempMat(:,n)==0);
+                    if numel(idx) > ceil(allowedMissing*size(tempMat,1)) 
+                        c = [c;n];
+                    end
+                end 
+                numel(c)
+                tempMat(:,c) = [];
+                tempPeaks(c,:) = [];
+                tempMat(tempMat==0) = NaN;
+                tempMat = tempMat';
+                tempMat = knnimpute(tempMat,10);
+                tempMat = tempMat';
+                peakOut{j} = tempPeaks;
+                matOut{j} = tempMat;
+            end
         end
+    catch exception
+       disp(exception.message);
+       if size(exception,1) > 0
+            fprintf('File: %s \n',exception.stack.name);
+            fprintf('Line no.: %d \n',exception.stack.line);
+       end
+       diary off
+       commandOutput = fileread(commandFile);
+       set(handles.commandWindow,'String',commandOutput); 
+       delete(commandFile);
+       failedProcess(handles); 
+       delete(commandFile);
+       return
     end
-catch exception
-   disp(exception.message);
-   if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-   end
-   diary off
-   commandOutput = fileread(commandFile);
-   set(handles.commandWindow,'String',commandOutput); 
-   delete(commandFile);
-   failedProcess(handles); 
-   delete(commandFile);
-   return
+else
+    intensityMatrix(intensityMatrix==0) = NaN;
 end
 diary off
 commandOutput = fileread(commandFile);
@@ -450,6 +473,8 @@ try
         %tempData = [FileName',num2cell(intensityMatrix)];
         %tempData = [num2cell([NaN,allPeaks']);tempData];
         writeOutput(intensityMatrix,allPeaks,FileName,exportName,PathName,1);
+        tempExport = [allPeaks';intensityMatrix];
+        save([PathName exportName '.mat'],'tempExport');
         %xlswrite([PathName '\' exportName '.xlsx'],intensityMatrix,'Sheet1','B2');
         %xlswrite([PathName '\' exportName '.xlsx'],FileName','Sheet1','A2');
         %xlswrite([PathName '\' exportName '.xlsx'],allPeaks','Sheet1','B1');
@@ -470,6 +495,8 @@ try
                 %tempData = [FileNamePos',num2cell(tempMat)];
                 %tempData = [num2cell([NaN,tempPeaks']);tempData];
                 writeOutput(tempMat,tempPeaks,FileNamePos,exportName,PathName,2);
+                tempExport = [tempPeaks';tempMat];
+                save([PathName exportName '_pos.mat'],'tempExport');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'pos','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNamePos','pos','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','pos','B1'); 
@@ -482,6 +509,8 @@ try
                 %tempData = [FileNameNeg',num2cell(tempMat)];
                 %tempData = [num2cell([NaN,tempPeaks']);tempData];
                 writeOutput(tempMat,tempPeaks,FileNameNeg,exportName,PathName,3);
+                tempExport = [tempPeaks';tempMat];
+                save([PathName exportName '_neg.mat'],'tempExport');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempMat,'neg','B2');
                 %xlswrite([PathName '\' exportName '.xlsx'],FileNameNeg','neg','A2');
                 %xlswrite([PathName '\' exportName '.xlsx'],tempPeaks','neg','B1');
