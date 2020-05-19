@@ -56,6 +56,11 @@ if isequal(FileName, 0)
     failedProcess(handles);
     return
 end 
+if ~iscell(FileName)
+   errordlg('Minimum file input is 2');
+   failedProcess(handles);
+   return
+end
 commandFile = [PathName '\log.txt'];
 diary(commandFile);
 %diary on
