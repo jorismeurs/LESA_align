@@ -6,7 +6,12 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
    processVal = parameters.polarity;
    minMZ = parameters.minMZ;
    maxMZ = parameters.maxMZ;
-
+   
+   
+   minTIC = inputdlg('Enter minimum TIC:','Minimum TIC',...
+       [1 35],{'1000'});
+   minTIC = cell2mat(minTIC);
+   
    peakList = []; peakListPos = []; peakListNeg = [];
    wb = waitbar(0,sprintf('Peak picking'));
    %set(findall(wb),'Units', 'normalized');
@@ -54,27 +59,27 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       if processVal == 1
          includedScans = [];
          for n = 1:length(posIdx)
-            if msStruct.scan(posIdx(n)).basePeakIntensity > 1e5
+            if msStruct.scan(posIdx(n)).basePeakIntensity > minTIC
                includedScans = [includedScans;posIdx(n)];
             end
          end
       elseif processVal == 2
          includedScans = [];
          for n = 1:length(negIdx)
-            if msStruct.scan(negIdx(n)).basePeakIntensity > 1e5
+            if msStruct.scan(negIdx(n)).basePeakIntensity > minTIC
                includedScans = [includedScans;negIdx(n)];
             end
          end
       elseif processVal == 3
          includedScansNeg = [];
          for n = 1:length(negIdx)
-            if msStruct.scan(negIdx(n)).basePeakIntensity > 1e5
+            if msStruct.scan(negIdx(n)).basePeakIntensity > minTIC
                includedScansNeg = [includedScansNeg;negIdx(n)];
             end
          end
          includedScansPos = [];
          for n = 1:length(posIdx)
-            if msStruct.scan(posIdx(n)).basePeakIntensity > 1e5
+            if msStruct.scan(posIdx(n)).basePeakIntensity > minTIC
                includedScansPos = [includedScansPos;posIdx(n)];
             end
          end
@@ -90,7 +95,9 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       if processVal == 1 || processVal == 2
          if ~isempty(includedScans) 
              includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
-             includedScans(1:10) = [];
+             if length(includedScans) > 1
+                includedScans(1:10) = [];
+             end
              for n = 1:length(includedScans)
                 scanData = msStruct.scan(includedScans(n)).peaks.mz;
                 mz = scanData(1:2:end);
@@ -109,7 +116,9 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       else
          includedDataPos  = []; mzData = []; intData = []; interpolatedSpectra = [];
          if ~isempty(includedScansPos) 
-             includedScansPos(1:10) = [];
+             if length(includedScans) > 1
+                includedScans(1:10) = [];
+             end
              for n = 1:length(includedScansPos)
                 scanData = msStruct.scan(includedScansPos(n)).peaks.mz;
                 mz = scanData(1:2:end);
@@ -127,7 +136,9 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
          end
 
          if ~isempty(includedScansNeg) 
-             includedScansNeg(1:10) = [];
+             if length(includedScans) > 1
+                includedScans(1:10) = [];
+             end
              includedDataNeg = []; mzData = []; intData = []; interpolatedSpectra = [];
              for n = 1:length(includedScansNeg)
                 scanData = msStruct.scan(includedScansNeg(n)).peaks.mz;
