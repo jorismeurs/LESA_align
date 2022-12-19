@@ -1,6 +1,6 @@
 function varargout = LESA_align(varargin)
 % Tool for alignment of direct infusion type mass spectrometry data
-% Copyright (c) 2020 Joris Meurs, MSc
+% Copyright (c) 2020 Joris Meurs, PhD
 % All rights reserved
 
 % Last Modified by GUIDE v2.5 18-May-2020 10:06:57
@@ -92,6 +92,7 @@ parameters.name = get(handles.fileName,'String');
 parameters.polarity = get(handles.polaritySelection,'Value');
 parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
 parameters.outputVal = get(handles.outputType,'Value');
+
 if get(handles.absInt,'Value') == 1
    parameters.intensityVal = 1;
 end
