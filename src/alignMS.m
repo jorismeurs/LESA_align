@@ -86,7 +86,7 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    [mzxmlFiles,massSpec] = convertRaw(PathName,FileName,parameters);
+    mzxmlFiles = convertRaw(PathName,FileName,parameters);
 catch exception
    disp(exception.message); 
    if size(exception,1) > 0
@@ -108,7 +108,7 @@ set(handles.commandWindow,'String',commandOutput);
 disp(parameters.outputVal);
 if parameters.outputVal == 2
    linearBinningSpectra(mzxmlFiles,parameters); 
-   %updateProcess(length(handles.processName),handles);
+   updateProcess(length(handles.processName),handles);
    return 
 end
 
@@ -116,12 +116,12 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    disp(massSpec);
-    if ~isequal(massSpec,'OrbiSIMS')
+    %disp(massSpec);
+    %if ~isequal(massSpec,'OrbiSIMS')
         [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-    else
-        [peakData,val] = retrieveSIMSPeaks(mzxmlFiles,parameters);
-    end
+    %else
+    %    [peakData,val] = retrieveSIMSPeaks(mzxmlFiles,parameters);
+    %end
 catch exception
     disp(exception.message);
     if size(exception,1) > 0
