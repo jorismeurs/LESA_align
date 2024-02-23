@@ -25,10 +25,11 @@ For smooth functioning of the GUI. Please convert .RAW files to **.mzXML** files
 1. Open MATLAB
 2. Set the current folder so that you can see all .m files (LESA_align/src/)
 <img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/current_folder.png">
+
 3. Double click on LESA_align.m
 4. Press **Run** to open the GUI
 5. Change default parameters if desired. Fields **Background Spectrum** and **Export file name** are optional
-![alt text](https://github.com/jorismeurs/LESA_align/blob/master/images/gui.png)
+<img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/gui.png">
 7. Press 'Process data'
 8. Select files for processing and wait till finished
 
