@@ -9,6 +9,7 @@ Aligment tool for LESA-MS and direct infusion MS data
 
 ## File format
 For smooth functioning of the GUI. Please convert .RAW files to .mzXML files using ProteoWizard. No filters have to be selected. Make sure to select **32-bit** and **uncheck zlib compression**
+![alt text](https://github.com/jorismeurs/LESA_align/blob/master/images/proteowizard.png)
 
 **! Make sure you do not use dots as separator within the file name !**
 
