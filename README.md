@@ -33,4 +33,4 @@ For smooth functioning of the GUI. Please convert .RAW files to **.mzXML** files
 8. Select files for processing and wait till finished
 
 # Use output
-The output consists of an Excel file with a matrix of peak intensities per polarity. These aligned matrices can then be used for further multvariate analysis with e.g. SIMCA-P or MetaboAnalysts (https://www.metaboanalyst.ca/). Be aware that the first row of each sheet m/z values
+The output consists of an Excel file with a matrix of peak intensities per polarity. These aligned matrices can then be used for further multivariate analysis with e.g. SIMCA-P or MetaboAnalysts (https://www.metaboanalyst.ca/). Be aware that the first row of each sheet m/z values
