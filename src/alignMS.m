@@ -3,11 +3,6 @@
 % Joris Meurs, PhD (2023)
 
 function alignMS(parameters,handles) 
-% parameters.minMZ = 70;
-% parameters.maxMZ = 1050;
-% parameters.tolerance = 5;
-% parameters.threshold = 10000;
-% parameters.polarity = 3;
 
 % Initiate process
 try
@@ -44,9 +39,7 @@ end
 processVal = processVal+1;
 updateProcess(processVal,handles);
 
-%try
-[FileName, PathName] = uigetfile({'*.mzXML','LESA-MS Files (.mzXML)';...
-    '*.txt','OrbiSIMS Files (.txt)'},...
+[FileName, PathName] = uigetfile({'*.mzXML','LESA-MS Files (.mzXML)'},...
 'MultiSelect','on');
 if isequal(FileName, 0)
     failedProcess(handles);
@@ -60,42 +53,11 @@ end
 commandFile = [PathName '\log.txt'];
 diary(commandFile);
 
-% Convert .RAW files
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    mzxmlFiles = convertRaw(PathName,FileName,parameters);
-catch exception
-   disp(exception.message); 
-   if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-   diary off
-   commandOutput = fileread(commandFile);
-   set(handles.commandWindow,'String',commandOutput);
-   delete(commandFile);
-   failedProcess(handles);
-   return
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-% Retrieve peaklist per file
-disp(parameters.outputVal);
-if parameters.outputVal == 2
-   linearBinningSpectra(mzxmlFiles,parameters); 
-   updateProcess(length(handles.processName),handles);
-   return 
-end
-
-diary on
-processVal = processVal+1;
-updateProcess(processVal,handles);
-try
-    [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
+   	[peakData,val] = retrievePeaks(mzxmlFiles,parameters);
 catch exception
     disp(exception.message);
     if size(exception,1) > 0
@@ -113,89 +75,10 @@ diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
 
-% Generate unique peak matrix
-processVal = processVal+1;
-updateProcess(processVal,handles);
-
-diary on
-% Change processing value if polarity data is completely missing 
-if val == 3
-    negIDX = (length(peakData)/2)+1:length(peakData);
-    posIDX = 1:length(peakData)/2;
-    if isempty(cell2mat(peakData(posIDX,1)))
-        val = 2;
-        peakData = peakData(negIDX,1);
-    end
-    if isempty(cell2mat(peakData(negIDX,1)))
-        val = 1;
-        peakData = peakData(posIDX,1);
-    end
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-diary on
-try
-    if val ~=3
-        if isempty(cell2mat(peakData))
-            failedProcess(handles)
-            errordlg('No peaks detected at chosen polarity');
-            return
-        else
-            allPeaks = uniquePeaks(peakData,parameters);
-        end
-    else
-        for j = 1:2           
-            if j == 1
-                allPeaks{j} = uniquePeaks(peakData(posIDX,1),parameters);
-            else
-                allPeaks{j} = uniquePeaks(peakData(negIDX,1),parameters);
-            end
-        end
-    end
-catch exception
-    disp(exception.message);
-    if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-    diary off
-    commandOutput = fileread(commandFile);
-    set(handles.commandWindow,'String',commandOutput);
-    delete(commandFile);
-    failedProcess(handles);
-    return
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-% Remove isotopes from peak list
+% Align peak lists
 diary on
 processVal = processVal+1;
-updateProcess(processVal,handles);
-try
-    if val ~= 3
-        allPeaks = deisotope(allPeaks);
-    else
-        for j = 1:2
-           allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
-        end
-    end
-catch exception
-    disp(exception.message);
-    if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-    diary off
-    commandOutput = fileread(commandFile);
-    set(handles.commandWindow,'String',commandOutput);
-    failedProcess(handles);
-    delete(commandFile);
-    return
-end
+
 diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
