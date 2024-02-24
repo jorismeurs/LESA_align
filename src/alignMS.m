@@ -24,16 +24,8 @@ catch exception
         fprintf('File: %s \n',exception.stack.name);
         fprintf('Line no.: %d \n',exception.stack.line);
     end
-%     diary off
-%     commandOutput = fileread(commandFile);
-%     set(handles.commandWindow,'String',commandOutput);
-%     delete(commandFile);
-%     failedProcess(handles);
     return
 end
-%diary off
-%commandOutput = fileread(commandFile);
-%set(handles.commandWindow,'String',commandOutput);
 
 % Browse for files
 processVal = processVal+1;
@@ -78,7 +70,18 @@ set(handles.commandWindow,'String',commandOutput);
 % Align peak lists
 diary on
 processVal = processVal+1;
-
+% Deal with two peak lists when both polarities are chosen
+if val == 3
+    for j = 1:length(peakData)
+        if j == 1 % Data from positive mode
+            % Add cluster align function
+        elseif j == 2 % Data from negative mode
+            % Add cluster align function
+        end
+    end
+else
+    % Add cluster align function
+end
 diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
@@ -87,33 +90,7 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-if ~isempty(parameters.backgroundSpectrum)
-    
-    try
-       if val ~= 3
-           allPeaks = subtractBackground(allPeaks,parameters);
-       else
-          for j = 1:2
-             allPeaks{j} = subtractBackground(cell2mat(allPeaks(j)),parameters,j); 
-          end
-       end
-    catch exception
-          disp(exception.message);
-          if size(exception,1) > 0
-                fprintf('File: %s \n',exception.stack.name);
-                fprintf('Line no.: %d \n',exception.stack.line);
-          end
-          diary off
-          commandOutput = fileread(commandFile);
-          set(handles.commandWindow,'String',commandOutput);  
-          failedProcess(handles);
-          delete(commandFile);
-          return 
-    end
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
+% Add new background subtraction functionality
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
