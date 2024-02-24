@@ -1,9 +1,6 @@
 % Functionality behind LESA_align GUI for processing .RAW files
-%
-% (c) Joris Meurs, MSc (2020)
-%
-% Write to .CSV
-%
+% Code takes .mzXML files and ensures peak picking and alignment. The output is an aligned feature list
+% Joris Meurs, PhD (2023)
 
 function alignMS(parameters,handles) 
 % parameters.minMZ = 70;
@@ -62,23 +59,6 @@ if ~iscell(FileName)
 end
 commandFile = [PathName '\log.txt'];
 diary(commandFile);
-%diary on
-%catch exception
-%    disp(exception.message);
-%    if size(exception,1) > 0
-%         fprintf('File: %s \n',exception.stack.name);
-%         fprintf('Line no.: %d \n',exception.stack.line);
-%     end
-%    diary off
-%    commandOutput = fileread(commandFile);
-%    set(handles.commandWindow,'String',commandOutput);
-%    delete(commandFile);
-%   failedProcess(handles);
-%   return
-%end
-%diary off
-%commandOutput = fileread(commandFile);
-%set(handles.commandWindow,'String',commandOutput);
 
 % Convert .RAW files
 diary on
@@ -115,12 +95,7 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    %disp(massSpec);
-    %if ~isequal(massSpec,'OrbiSIMS')
-        [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-    %else
-    %    [peakData,val] = retrieveSIMSPeaks(mzxmlFiles,parameters);
-    %end
+    [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
 catch exception
     disp(exception.message);
     if size(exception,1) > 0
