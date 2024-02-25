@@ -36,11 +36,6 @@ function LESA_align_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for LESA_align
 handles.output = hObject;
 
-if ~exist('C:\ProteoWizard', 'dir')
-   errordlg('ProteoWizard not found');
-   return
-end
-
 % Update handles structure
 axes(handles.axes1);
 set(gca,'XTick',[],'YTick',[]);
@@ -49,13 +44,9 @@ set(handles.figure1,'Name','LESA Alignment Tool');
 handles.processNames = {
     'Validating parameters'
     'Loading files...'
-    'Converting files to .mzXML...'
     'Retrieving peak lists...'
-    'Get unique peaks...'
-    'Removing isotopes...'
+    'Aligning peaks...'
     'Remove background...'
-    'Generating intensity matrix...'
-    'Exporting unfiltered matrix...'
     'Filter and impute matrix...'
     'Exporting filtered matrix....'
     'Finished'
