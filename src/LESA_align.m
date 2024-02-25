@@ -81,7 +81,6 @@ parameters.threshold = str2num(get(handles.thresholdInt,'String'));
 parameters.tolerance = str2num(get(handles.massTolerance,'String'));
 parameters.polarity = get(handles.polaritySelection,'Value');
 parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
-parameters.outputVal = get(handles.outputType,'Value');
 
 if get(handles.absInt,'Value') == 1
    parameters.intensityVal = 1;
