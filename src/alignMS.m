@@ -94,13 +94,13 @@ updateProcess(processVal,handles);
 if ~isempty(parameters.backgroundSpectrum)
     % Deal with processing both polarities
     if val == 3
-		for j = 1:2
-			if j == 1 % positive mode
-       				[mzList_pos,intensityMatrix_pos] = subtractBackground(mzList_pos,intensityMatrix_pos,parameters);
-   			elseif j == 2 % negative mode
-				[mzList_neg,intensityMatrix_neg] = subtractBackground(mzList_neg,intensityMatrix_neg,parameters);
-   			end
-  		end
+        for j = 1:2
+            if j == 1 % positive mode
+                    [mzList_pos,intensityMatrix_pos] = subtractBackground(mzList_pos,intensityMatrix_pos,parameters);
+            elseif j == 2 % negative mode
+                [mzList_neg,intensityMatrix_neg] = subtractBackground(mzList_neg,intensityMatrix_neg,parameters);
+            end
+        end
     else
         [mzList,intensityMatrix] = subtractBackground(mzList,intensityMatrix,parameters);
     end
@@ -118,13 +118,13 @@ if parameters.imputationType == 2
 	if val == 3
 		for j = 1:2
 			if j == 1
-				[CMZ_pos,intensityMatrix_pos] = imputeMissing(CMZ_pos,intensityMatrix_pos); 
+				[mzList_pos,intensityMatrix_pos] = imputeMissing(mzList_pos,intensityMatrix_pos); 
 	  		elseif j == 2
-				[CMZ_neg,intensityMatrix_neg] = imputeMissing(CMZ_neg,intensityMatrix_neg); 
+				[mzList_neg,intensityMatrix_neg] = imputeMissing(mzList_neg,intensityMatrix_neg); 
 	 		end
 	 	end 
 	else
-		[CMZ,intensityMatrix] = imputeMissing(CMZ,intensityMatrix,parameters);
+		[mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix,parameters);
 	end
 end
 diary off
@@ -132,17 +132,17 @@ commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
 
 % Export aligned peak list(s)
-dairy on
+diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 if val == 3
-	for j = 1:2
- 		if j == 1 % positive mode
-			exportFile(mzList_pos,intensityMatrix_pos,FileName,j);
-  		elseif j == 2 % negative mode
-			exportFile(mzList_neg,intensityMatrix_neg,FileName,j);
- 		end
-   	end
+    for j = 1:2
+        if j == 1 % positive mode
+            exportFile(mzList_pos,intensityMatrix_pos,FileName,j);
+        elseif j == 2 % negative mode
+            exportFile(mzList_neg,intensityMatrix_neg,FileName,j);
+        end
+    end
 else
 	exportFile(mzList,intensityMatrix,FileName);
 end
