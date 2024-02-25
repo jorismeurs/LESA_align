@@ -111,23 +111,30 @@ set(handles.commandWindow,'String',commandOutput);
 
 % Impute missing values when 'kNN' is selected
 diary on
-
-% Deal with polarities
-if val == 3
-	for j = 1:2
-		if j == 1
-			[CMZ_pos,intensityMatrix_pos] = imputeMissing(CMZ_pos,intensityMatrix_pos); 
-  		elseif j == 2
-			[CMZ_neg,intensityMatrix_neg] = imputeMissing(CMZ_neg,intensityMatrix_neg); 
- 		end
- 	end 
-else
-	[CMZ,intensityMatrix] = imputeMissing(CMZ,intensityMatrix,parameters);
+processVal = processVal+1;
+updateProcess(processVal,handles);
+if parameters.imputationType == 2
+	% Deal with polarities
+	if val == 3
+		for j = 1:2
+			if j == 1
+				[CMZ_pos,intensityMatrix_pos] = imputeMissing(CMZ_pos,intensityMatrix_pos); 
+	  		elseif j == 2
+				[CMZ_neg,intensityMatrix_neg] = imputeMissing(CMZ_neg,intensityMatrix_neg); 
+	 		end
+	 	end 
+	else
+		[CMZ,intensityMatrix] = imputeMissing(CMZ,intensityMatrix,parameters);
+	end
 end
 diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 % Export aligned peak list(s)
 dairy on
+processVal = processVal+1;
+updateProcess(processVal,handles);
 if val == 3
 	for j = 1:2
  		if j == 1 % positive mode
@@ -139,7 +146,9 @@ if val == 3
 else
 	exportFile(mzList,intensityMatrix,FileName);
 end
-dairy off
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
 
 
 end
