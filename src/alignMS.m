@@ -119,7 +119,7 @@ if val == 3
  		end
  	end 
 else
-
+	[CMZ,intensityMatrix] = imputeMissing(CMZ,intensityMatrix,parameters);
 end
 diary off
 
@@ -128,9 +128,9 @@ dairy on
 if val == 3
 	for j = 1:2
  		if j == 1 % positive mode
-			exportFile(mzList_pos,intensityMatrix_pos);
+			exportFile(mzList_pos,intensityMatrix_pos,j);
   		elseif j == 2 % negative mode
-			exportFile(mzList_neg,intensityMatrix_neg);
+			exportFile(mzList_neg,intensityMatrix_neg,j);
  		end
    	end
 else
