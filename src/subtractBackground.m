@@ -1,4 +1,4 @@
-function [mz_list,intensity_data] = subtractBackground(mz_list,intensity_data,backgroundPeaks,parameters)
+function [mz_list,intensity_data] = subtractBackground(mz_list,intensity_data,parameters)
            
     % Retrieve relevant parameter values from structure
     tolerance = parameters.tolerance;
