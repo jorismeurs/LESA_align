@@ -8,30 +8,42 @@ function exportFile(mzList,intensityMatrix,file_names,j)
 
     if j == 0 % Single file
         intensityMatrix = intensityMatrix'; % Transpose matrix to have data files in rows
-        mzList = num2str(mzList');
-        T = table(file_names);
+        
+        T = table(file_names'); % Transpose file names to have them in rows
         T.Properties.VariableNames = {'File_name'};
         T = [T,array2table(intensityMatrix)];
-        T.Properties.VariableNames(2:end) = mzList;
+        mz_cell = [];
+        for j = 1:length(mzList)
+           mz_cell = [mz_cell,cellstr(num2str(mzList(j)))]; 
+        end
+        T.Properties.VariableNames(2:end) = mz_cell;
         exportName = [datestr(now,'yymmdd-HHMMSS') '.csv'];
         writetable(T,exportName);
     else
         if j == 1
             intensityMatrix = intensityMatrix'; % Transpose matrix to have data files in rows
-            mzList = num2str(mzList');
-            T = table(file_names);
+
+            T = table(file_names'); % Transpose file names to have them in rows
             T.Properties.VariableNames = {'File_name'};
             T = [T,array2table(intensityMatrix)];
-            T.Properties.VariableNames(2:end) = mzList;
+            mz_cell = [];
+            for j = 1:length(mzList)
+               mz_cell = [mz_cell,cellstr(num2str(mzList(j)))]; 
+            end
+            T.Properties.VariableNames(2:end) = mz_cell;
             exportName = [datestr(now,'yymmdd-HHMMSS') '_pos.csv'];
             writetable(T,exportName);    
         elseif j == 2
             intensityMatrix = intensityMatrix'; % Transpose matrix to have data files in rows
-            mzList = num2str(mzList');
-            T = table(file_names);
+
+            T = table(file_names'); % Transpose file names to have them in rows
             T.Properties.VariableNames = {'File_name'};
             T = [T,array2table(intensityMatrix)];
-            T.Properties.VariableNames(2:end) = mzList;
+            mz_cell = [];
+            for j = 1:length(mzList)
+               mz_cell = [mz_cell,cellstr(num2str(mzList(j)))]; 
+            end
+            T.Properties.VariableNames(2:end) = mz_cell;
             exportName = [datestr(now,'yymmdd-HHMMSS') '_neg.csv'];
             writetable(T,exportName);
         end
