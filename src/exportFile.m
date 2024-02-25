@@ -2,7 +2,7 @@ function exportFile(mzList,intensityMatrix,file_names,j)
 % Function to export stored peak lists and corresponding intensities to a .csv file
     
     % Deal with export of both positive and negative mode data
-    if nargin < 3
+    if nargin < 4
       j = 0;
     end
 
