@@ -153,7 +153,7 @@ if parameters.imputationType == 2
 	 		end
 	 	end 
 	else
-		[mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix,parameters);
+		[mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix);
 	end
 end
 catch exception
