@@ -76,7 +76,7 @@ if val == 3
         if j == 1 % Data from positive mode
 			[mzList_pos,intensityMatrix_pos] = clusterAlign(peakData);
         elseif j == 2 % Data from negative mode
-			[mzList_pos,intensityMatrix_neg] = clusterAlign(peakData);
+			[mzList_neg,intensityMatrix_neg] = clusterAlign(peakData);
         end
     end
 else
@@ -90,22 +90,18 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-% Add new background subtraction functionality
 if ~isempty(parameters.backgroundSpectrum)
     % Deal with processing both polarities
     if val == 3
 		for j = 1:2
 			if j == 1 % positive mode
-   				backgroundPeaks_pos = getBackgroundPeaks(parameter);
-       				intensityMatrix = subtractBackground(backgroundPeaks_pos);
+       				[mzList_pos,intensityMatrix_pos] = subtractBackground(mzList_pos,intensityMatrix_pos,parameters);
    			elseif j == 2 % negative mode
-				backgroundPeaks_neg = getBackgroundPeaks(parameters);
-    				intensityMatrix = subtractBackground(backgroundPeaks_neg);
+				[mzList_neg,intensityMatrix_neg] = subtractBackground(mzList_neg,intensityMatrix_neg,parameters);
    			end
   		end
     else
-        backgroundPeaks = getBackgroundPeaks(parameters);
-		intensityMatrix = subtractBackground(backgroundPeaks);
+        [mzList,intensityMatrix] = subtractBackground(mzList,intensityMatrix,parameters);
     end
 end
 diary off
@@ -132,13 +128,13 @@ dairy on
 if val == 3
 	for j = 1:2
  		if j == 1 % positive mode
-			exportFile(CMZ_pos,intensityMatrix_pos);
+			exportFile(mzList_pos,intensityMatrix_pos);
   		elseif j == 2 % negative mode
-			exportFile(CMZ_neg,intensityMatrix_neg);
+			exportFile(mzList_neg,intensityMatrix_neg);
  		end
    	end
 else
-	exportFile(CMZ,intensityMatrix);
+	exportFile(mzList,intensityMatrix);
 end
 dairy off
 
