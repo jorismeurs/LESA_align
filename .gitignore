@@ -2,3 +2,4 @@
 src/clusterAlign.asv
 example_data/log.txt
 *.asv
+*.csv
