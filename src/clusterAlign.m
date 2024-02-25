@@ -15,8 +15,8 @@ function [CMZ,intensityMatrix] = clusterAlign(peakData)
 
     intensityMatrix = nan(numel(CMZ),length(peakData));
     for i = 1:length(peakData)
-        [j,k] = samplealign([CMZ PR],allPeaks{i},'BAND',1,'WEIGHTS',[1 0]);
-        intensityMatrix(j,i) = allPeaks{i}(k,2);
+        [j,k] = samplealign([CMZ PR],peakData{i},'BAND',1,'WEIGHTS',[1 0]);
+        intensityMatrix(j,i) = peakData{i}(k,2);
     end
 end
 
