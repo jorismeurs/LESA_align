@@ -48,6 +48,7 @@ diary(commandFile);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
+mzxmlFiles = fullfile(PathName,FileName);
 try
    	[peakData,val] = retrievePeaks(mzxmlFiles,parameters);
 catch exception
@@ -110,12 +111,14 @@ set(handles.commandWindow,'String',commandOutput);
 
 % Impute missing values when 'kNN' is selected
 diary on
+
+% Deal with polarities
 if val == 3
 	for j = 1:2
 		if j == 1
-			[CMZ_pos,intensityMatrix_pos] = imputeMissing(CMZ_pos,intensityMatrix_pos,parameters); 
+			[CMZ_pos,intensityMatrix_pos] = imputeMissing(CMZ_pos,intensityMatrix_pos); 
   		elseif j == 2
-			[CMZ_neg,intensityMatrix_neg] = imputeMissing(CMZ_neg,intensityMatrix_neg,parameters); 
+			[CMZ_neg,intensityMatrix_neg] = imputeMissing(CMZ_neg,intensityMatrix_neg); 
  		end
  	end 
 else
@@ -128,13 +131,13 @@ dairy on
 if val == 3
 	for j = 1:2
  		if j == 1 % positive mode
-			exportFile(mzList_pos,intensityMatrix_pos,j);
+			exportFile(mzList_pos,intensityMatrix_pos,FileName,j);
   		elseif j == 2 % negative mode
-			exportFile(mzList_neg,intensityMatrix_neg,j);
+			exportFile(mzList_neg,intensityMatrix_neg,FileName,j);
  		end
    	end
 else
-	exportFile(mzList,intensityMatrix);
+	exportFile(mzList,intensityMatrix,FileName);
 end
 dairy off
 
