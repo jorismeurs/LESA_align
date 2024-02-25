@@ -1,28 +1,9 @@
-function samplePeaks = subtractBackground(peakList,parameters,iteration)
-    
-    % Only required for processing both polarities
-    % Value is dummy when not present, no impact on processing
-    if nargin < 3
-        iteration = 1;
-    end
-    
+function [mz_list,intensity_data] = subtractBackground(mz_list,intensity_data,backgroundPeaks,parameters)
+           
     % Retrieve relevant parameter values from structure
-    processingVal = parameters.polarity;
     tolerance = parameters.tolerance;
     threshold = parameters.threshold;
     spectrumFile = parameters.backgroundSpectrum;
-    
-    % Determine file type spectrum
-    fileExtLoc = find(spectrumFile=='.');
-    fileExt = spectrumFile(fileExtLoc+1:end);
-    PathLoc = find(spectrumFile=='\');
-    OutputPath = spectrumFile(1:PathLoc(end)-1);
-    % Convert if .RAW file
-    if isequal(fileExt,'raw')
-        system('cd C:\ProteoWizard\');
-        system(['msconvert ' spectrumFile ' --mzXML --32 -o ' OutputPath]);
-        spectrumFile = [spectrumFile(1:fileExtLoc) 'mzXML'];
-    end
     
     % Generate CMZ
     binSize = -8e-8; % Empirical value
@@ -32,75 +13,14 @@ function samplePeaks = subtractBackground(peakList,parameters,iteration)
     mzChannels = ones(size(mzChannels))./(mzChannels.^2);
 
     % Parse background file
+    includedScans = [];
     msStruct = mzxmlread(spectrumFile,'Levels',1);
-    
-    % Positive only
-    if processingVal == 1
-         posIdx = [];
-         for n = 1:length(msStruct.scan)
-            if msStruct.scan(n).polarity == '+' 
-                posIdx = [posIdx;n];
-            end
-         end
-         
-         includedScans = [];
-         for n = 1:length(posIdx)
-            if msStruct.scan(posIdx(n)).basePeakIntensity > 1e5
-               includedScans = [includedScans;posIdx(n)];
-            end
-         end
-         totalPeaks = peakList;
-    % Negative only
-    elseif processingVal == 2
-         negIdx = [];
-         for n = 1:length(msStruct.scan)
-            if msStruct.scan(n).polarity == '-' 
-                negIdx = [negIdx;n];
-            end
-         end
-         
-         includedScans = [];
-         for n = 1:length(negIdx)
-            if msStruct.scan(negIdx(n)).basePeakIntensity > 1e5
-               includedScans = [includedScans;negIdx(n)];
-            end
-         end
-         totalPeaks = peakList;
-    % Deal with both polarities
-    elseif processingVal == 3        
-        if iteration == 1
-             posIdx = [];
-             for n = 1:length(msStruct.scan)
-                if msStruct.scan(n).polarity == '+' 
-                    posIdx = [posIdx;n];
-                end
-             end    
-
-             includedScans = [];
-             for n = 1:length(posIdx)
-                if msStruct.scan(posIdx(n)).basePeakIntensity > 1e5
-                   includedScans = [includedScans;posIdx(n)];
-                end
-             end
-             totalPeaks = peakList;
-        elseif iteration == 2
-             negIdx = [];
-             for n = 1:length(msStruct.scan)
-                if msStruct.scan(n).polarity == '-' 
-                    negIdx = [negIdx;n];
-                end
-             end
-
-             includedScans = [];
-             for n = 1:length(negIdx)
-                if msStruct.scan(negIdx(n)).basePeakIntensity > 1e5
-                   includedScans = [includedScans;negIdx(n)];
-                end
-             end
-             totalPeaks = peakList;
+    for n = 1:length(msStruct.scan)
+        if msStruct.scan(n).basePeakIntensity > 1e5
+           includedScans = [includedScans;n];
         end
     end
-    
+       
     % Average MS1 spectra for background file
     includedData = []; mzData = []; intData = []; interpolatedSpectra = [];
     for n = 1:length(includedScans)
@@ -112,6 +32,7 @@ function samplePeaks = subtractBackground(peakList,parameters,iteration)
         mzData{n,1} = mz;
         intData{n,1} = int;
     end
+    
     interpolatedSpectra = cellfun(@(mzs,int) interp1(mzs,int,mzChannels,'linear'),mzData,intData,'UniformOutput',false);
     interpolatedSpectra = cell2mat(interpolatedSpectra);
     averageY = nanmean(interpolatedSpectra,1);
@@ -123,13 +44,16 @@ function samplePeaks = subtractBackground(peakList,parameters,iteration)
     removePeaks = [];
     for j = 1:length(backgroundPeaks)
         maxDev = ppmDeviation(backgroundPeaks(j,1),tolerance);
-        locPeak = find(totalPeaks(:,1) > backgroundPeaks(j,1)-maxDev & ...
-            totalPeaks(:,1) < backgroundPeaks(j,1)+maxDev);
+        locPeak = find(mz_list(:,1) > backgroundPeaks(j,1)-maxDev & ...
+            mz_list(:,1) < backgroundPeaks(j,1)+maxDev);
         if ~isempty(locPeak)
             removePeaks = [removePeaks;locPeak];
         end
     end
-    totalPeaks(locPeak,:) = [];
-    samplePeaks = totalPeaks;
+
+    if ~isempty(removePeaks)
+        mz_list(removePeaks,:) = [];
+        intensity_data(removePeaks,:) = [];
+    end
 end
 
