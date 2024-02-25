@@ -74,10 +74,8 @@ processVal = processVal+1;
 if val == 3
     for j = 1:length(peakData)
         if j == 1 % Data from positive mode
-            % Add cluster align function
 			[mzList_pos,intensityMatrix_pos] = clusterAlign(peakData);
         elseif j == 2 % Data from negative mode
-            % Add cluster align function
 			[mzList_pos,intensityMatrix_neg] = clusterAlign(peakData);
         end
     end
