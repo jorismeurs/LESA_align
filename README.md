@@ -24,7 +24,7 @@ For smooth functioning of the GUI. Please convert .RAW files to **.mzXML** files
 
 3. Double click on LESA_align.m
 4. Press **Run** to open the GUI
-5. Change default parameters if desired. Fields **Background Spectrum** and **Export file name** are optional
+5. Change default parameters if desired. Field **Background Spectrum** is optional. Field **Export** can be set to *Export all* or *80% abuncance filter + kNN imputation* to either export all detected peaks or apply a filter and impute missing values, respectively.
 <img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/gui_new.png">
 
 6. Press 'Process data'. A minimum of two files is required for processing.
