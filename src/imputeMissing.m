@@ -5,7 +5,8 @@ function [mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix)
    	% References
 	% [1] Smilde et al., Analytical Chemistry (2005), 77 (20), DOI: 10.1021/ac051080y
  	% [2] Di Guida et al., Metabolomics 2016, 12, 93,  DOI: 10.1007/s11306-016-1030-9
-
+    
+    r = [];
   	for j = 1:size(intensityMatrix,1)
 		idx = find(isnan(intensityMatrix(j,:)));
   		if numel(idx) > 0.2*size(intensityMatrix,2)
@@ -21,6 +22,6 @@ function [mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix)
 
  	% Impute remaining missing values
   	intensityMatrix = intensityMatrix';
-   	intensityMatrix = knnimpute(intensityMatrix,10)
+   	intensityMatrix = knnimpute(intensityMatrix,10);
 	intensityMatrix = intensityMatrix';
 end
