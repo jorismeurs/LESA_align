@@ -1,16 +1,8 @@
 % Functionality behind LESA_align GUI for processing .RAW files
-%
-% (c) Joris Meurs, MSc (2020)
-%
-% Write to .CSV
-%
+% Code takes .mzXML files and ensures peak picking and alignment. The output is an aligned feature list
+% Joris Meurs, PhD (2023)
 
 function alignMS(parameters,handles) 
-% parameters.minMZ = 70;
-% parameters.maxMZ = 1050;
-% parameters.tolerance = 5;
-% parameters.threshold = 10000;
-% parameters.polarity = 3;
 
 % Initiate process
 try
@@ -32,24 +24,14 @@ catch exception
         fprintf('File: %s \n',exception.stack.name);
         fprintf('Line no.: %d \n',exception.stack.line);
     end
-%     diary off
-%     commandOutput = fileread(commandFile);
-%     set(handles.commandWindow,'String',commandOutput);
-%     delete(commandFile);
-%     failedProcess(handles);
     return
 end
-%diary off
-%commandOutput = fileread(commandFile);
-%set(handles.commandWindow,'String',commandOutput);
 
 % Browse for files
 processVal = processVal+1;
 updateProcess(processVal,handles);
 
-%try
-[FileName, PathName] = uigetfile({'*.mzXML','LESA-MS Files (.mzXML)';...
-    '*.txt','OrbiSIMS Files (.txt)'},...
+[FileName, PathName] = uigetfile({'*.mzXML','LESA-MS Files (.mzXML)'},...
 'MultiSelect','on');
 if isequal(FileName, 0)
     failedProcess(handles);
@@ -62,65 +44,12 @@ if ~iscell(FileName)
 end
 commandFile = [PathName '\log.txt'];
 diary(commandFile);
-%diary on
-%catch exception
-%    disp(exception.message);
-%    if size(exception,1) > 0
-%         fprintf('File: %s \n',exception.stack.name);
-%         fprintf('Line no.: %d \n',exception.stack.line);
-%     end
-%    diary off
-%    commandOutput = fileread(commandFile);
-%    set(handles.commandWindow,'String',commandOutput);
-%    delete(commandFile);
-%   failedProcess(handles);
-%   return
-%end
-%diary off
-%commandOutput = fileread(commandFile);
-%set(handles.commandWindow,'String',commandOutput);
-
-% Convert .RAW files
-diary on
-processVal = processVal+1;
-updateProcess(processVal,handles);
-try
-    mzxmlFiles = convertRaw(PathName,FileName,parameters);
-catch exception
-   disp(exception.message); 
-   if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-   diary off
-   commandOutput = fileread(commandFile);
-   set(handles.commandWindow,'String',commandOutput);
-   delete(commandFile);
-   failedProcess(handles);
-   return
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-% Retrieve peaklist per file
-disp(parameters.outputVal);
-if parameters.outputVal == 2
-   linearBinningSpectra(mzxmlFiles,parameters); 
-   updateProcess(length(handles.processName),handles);
-   return 
-end
 
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 try
-    %disp(massSpec);
-    %if ~isequal(massSpec,'OrbiSIMS')
-        [peakData,val] = retrievePeaks(mzxmlFiles,parameters);
-    %else
-    %    [peakData,val] = retrieveSIMSPeaks(mzxmlFiles,parameters);
-    %end
+   	[peakData,val] = retrievePeaks(mzxmlFiles,parameters);
 catch exception
     disp(exception.message);
     if size(exception,1) > 0
@@ -138,88 +67,20 @@ diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
 
-% Generate unique peak matrix
-processVal = processVal+1;
-updateProcess(processVal,handles);
-
+% Align peak lists
 diary on
-% Change processing value if polarity data is completely missing 
+processVal = processVal+1;
+% Deal with two peak lists when both polarities are chosen
 if val == 3
-    negIDX = (length(peakData)/2)+1:length(peakData);
-    posIDX = 1:length(peakData)/2;
-    if isempty(cell2mat(peakData(posIDX,1)))
-        val = 2;
-        peakData = peakData(negIDX,1);
-    end
-    if isempty(cell2mat(peakData(negIDX,1)))
-        val = 1;
-        peakData = peakData(posIDX,1);
-    end
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-diary on
-try
-    if val ~=3
-        if isempty(cell2mat(peakData))
-            failedProcess(handles)
-            errordlg('No peaks detected at chosen polarity');
-            return
-        else
-            allPeaks = uniquePeaks(peakData,parameters);
-        end
-    else
-        for j = 1:2           
-            if j == 1
-                allPeaks{j} = uniquePeaks(peakData(posIDX,1),parameters);
-            else
-                allPeaks{j} = uniquePeaks(peakData(negIDX,1),parameters);
-            end
+    for j = 1:length(peakData)
+        if j == 1 % Data from positive mode
+            % Add cluster align function
+        elseif j == 2 % Data from negative mode
+            % Add cluster align function
         end
     end
-catch exception
-    disp(exception.message);
-    if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-    diary off
-    commandOutput = fileread(commandFile);
-    set(handles.commandWindow,'String',commandOutput);
-    delete(commandFile);
-    failedProcess(handles);
-    return
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
-
-% Remove isotopes from peak list
-diary on
-processVal = processVal+1;
-updateProcess(processVal,handles);
-try
-    if val ~= 3
-        allPeaks = deisotope(allPeaks);
-    else
-        for j = 1:2
-           allPeaks{j} = deisotope(cell2mat(allPeaks(j)));
-        end
-    end
-catch exception
-    disp(exception.message);
-    if size(exception,1) > 0
-        fprintf('File: %s \n',exception.stack.name);
-        fprintf('Line no.: %d \n',exception.stack.line);
-    end
-    diary off
-    commandOutput = fileread(commandFile);
-    set(handles.commandWindow,'String',commandOutput);
-    failedProcess(handles);
-    delete(commandFile);
-    return
+else
+    % Add cluster align function
 end
 diary off
 commandOutput = fileread(commandFile);
@@ -229,33 +90,7 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
-if ~isempty(parameters.backgroundSpectrum)
-    
-    try
-       if val ~= 3
-           allPeaks = subtractBackground(allPeaks,parameters);
-       else
-          for j = 1:2
-             allPeaks{j} = subtractBackground(cell2mat(allPeaks(j)),parameters,j); 
-          end
-       end
-    catch exception
-          disp(exception.message);
-          if size(exception,1) > 0
-                fprintf('File: %s \n',exception.stack.name);
-                fprintf('Line no.: %d \n',exception.stack.line);
-          end
-          diary off
-          commandOutput = fileread(commandFile);
-          set(handles.commandWindow,'String',commandOutput);  
-          failedProcess(handles);
-          delete(commandFile);
-          return 
-    end
-end
-diary off
-commandOutput = fileread(commandFile);
-set(handles.commandWindow,'String',commandOutput);
+% Add new background subtraction functionality
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately

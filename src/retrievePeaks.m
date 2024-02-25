@@ -54,7 +54,7 @@ function [peakList,processVal] = retrievePeaks(files,parameters)
       end
       
       % Filter scans based on base peak value
-      % Base peak should be larger than 1e5
+      % Base peak should be larger than a user-defined threshold
       wb = waitbar(j/length(files),wb,sprintf('Peak picking \n File %d/%d \n Filter scans',j,length(files)));
       if processVal == 1
          includedScans = [];
