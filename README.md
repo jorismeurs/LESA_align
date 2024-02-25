@@ -25,7 +25,7 @@ For smooth functioning of the GUI. Please convert .RAW files to **.mzXML** files
 3. Double click on LESA_align.m
 4. Press **Run** to open the GUI
 5. Change default parameters if desired. Fields **Background Spectrum** and **Export file name** are optional
-<img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/gui.png">
+<img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/gui_new.png">
 
 6. Press 'Process data'. A minimum of two files is required for processing.
 7. Select files for processing and wait till finished
