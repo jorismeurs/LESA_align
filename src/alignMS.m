@@ -150,6 +150,8 @@ diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
 
+processVal = processVal+1;
+updateProcess(processVal,handles); % Finished processing
 
 end
 
