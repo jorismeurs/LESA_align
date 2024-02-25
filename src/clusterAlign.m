@@ -1,7 +1,6 @@
 function [CMZ,intensityMatrix] = clusterAlign(peakData)
     % Function for aligning peaks using clustering based on Euclidean distance
-    peakList = cell2mat(allPeaks);
-    numPeaks = cellfun(@(x) length(x),allPeaks);
+    peakList = cell2mat(peakData);
 
     % Clustering based on Euclidean distance
     tree = linkage(pdist(peakList(:,1)));
