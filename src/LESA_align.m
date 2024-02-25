@@ -262,7 +262,7 @@ function browseFile_Callback(hObject, eventdata, handles)
 % hObject    handle to browseFile (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[FileName,PathName] = uigetfile({'*.raw','Thermo RAW Files (.raw)';'*.mzXML','mzXML Files (.mzXML)'});
+[FileName,PathName] = uigetfile({'*.mzXML','mzXML Files (.mzXML)'});
 if isequal(FileName,0)
     return
 end
