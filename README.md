@@ -27,7 +27,7 @@ For smooth functioning of the GUI. Please convert .RAW files to **.mzXML** files
 5. Change default parameters if desired. Fields **Background Spectrum** and **Export file name** are optional
 <img style="float: left;" src="https://github.com/jorismeurs/LESA_align/blob/master/images/gui.png">
 
-7. Press 'Process data'
+7. Press 'Process data'. A minimum of two files is required for processing.
 8. Select files for processing and wait till finished
 
 # How to use standalone application
