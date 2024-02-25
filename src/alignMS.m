@@ -75,12 +75,14 @@ if val == 3
     for j = 1:length(peakData)
         if j == 1 % Data from positive mode
             % Add cluster align function
+			[mzList_pos,intensityMatrix_pos] = clusterAlign(peakData);
         elseif j == 2 % Data from negative mode
             % Add cluster align function
+			[mzList_pos,intensityMatrix_neg] = clusterAlign(peakData);
         end
     end
 else
-    % Add cluster align function
+	[mzList,intensityMatrix] = clusterAlign(peakData);
 end
 diary off
 commandOutput = fileread(commandFile);
@@ -91,6 +93,24 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 % Add new background subtraction functionality
+if ~isempty(parameters.backgroundFile)
+    % Deal with processing both polarities
+    if val == 3
+		for j = 1:2
+			if j == 1 % positive mode
+   				backgroundPeaks_pos = getBackgroundPeaks();
+   			elseif j == 2 % negative mode
+				backgroundPeaks_neg = getBackgroundPeaks();
+   			end
+  		end
+    else
+        backgroundPeaks = getBackgroundPeaks();
+    end
+end
+diary off
+commandOutput = fileread(commandFile);
+set(handles.commandWindow,'String',commandOutput);
+
 
 % Retrieve intensities per peak for each file
 % Store original peak matrices separately
