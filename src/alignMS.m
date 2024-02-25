@@ -72,16 +72,30 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 % Deal with two peak lists when both polarities are chosen
-if val == 3
-    for j = 1:length(peakData)
-        if j == 1 % Data from positive mode
-			[mzList_pos,intensityMatrix_pos] = clusterAlign(peakData);
-        elseif j == 2 % Data from negative mode
-			[mzList_neg,intensityMatrix_neg] = clusterAlign(peakData);
+try
+    if val == 3
+        for j = 1:length(peakData)
+            if j == 1 % Data from positive mode
+                [mzList_pos,intensityMatrix_pos] = clusterAlign(peakData);
+            elseif j == 2 % Data from negative mode
+                [mzList_neg,intensityMatrix_neg] = clusterAlign(peakData);
+            end
         end
+    else
+        [mzList,intensityMatrix] = clusterAlign(peakData);
     end
-else
-	[mzList,intensityMatrix] = clusterAlign(peakData);
+catch exception
+   disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
+    failedProcess(handles);
+    return  
 end
 diary off
 commandOutput = fileread(commandFile);
@@ -92,17 +106,31 @@ diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
 if ~isempty(parameters.backgroundSpectrum)
-    % Deal with processing both polarities
-    if val == 3
-        for j = 1:2
-            if j == 1 % positive mode
-                    [mzList_pos,intensityMatrix_pos] = subtractBackground(mzList_pos,intensityMatrix_pos,parameters);
-            elseif j == 2 % negative mode
-                [mzList_neg,intensityMatrix_neg] = subtractBackground(mzList_neg,intensityMatrix_neg,parameters);
+    try
+        % Deal with processing both polarities
+        if val == 3
+            for j = 1:2
+                if j == 1 % positive mode
+                        [mzList_pos,intensityMatrix_pos] = subtractBackground(mzList_pos,intensityMatrix_pos,parameters);
+                elseif j == 2 % negative mode
+                    [mzList_neg,intensityMatrix_neg] = subtractBackground(mzList_neg,intensityMatrix_neg,parameters);
+                end
             end
+        else
+            [mzList,intensityMatrix] = subtractBackground(mzList,intensityMatrix,parameters);
         end
-    else
-        [mzList,intensityMatrix] = subtractBackground(mzList,intensityMatrix,parameters);
+    catch exception
+        disp(exception.message);
+        if size(exception,1) > 0
+            fprintf('File: %s \n',exception.stack.name);
+            fprintf('Line no.: %d \n',exception.stack.line);
+        end
+        diary off
+        commandOutput = fileread(commandFile);
+        set(handles.commandWindow,'String',commandOutput);
+        delete(commandFile);
+        failedProcess(handles);
+        return        
     end
 end
 diary off
@@ -113,6 +141,7 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
+try
 if parameters.imputationType == 2
 	% Deal with polarities
 	if val == 3
@@ -127,6 +156,19 @@ if parameters.imputationType == 2
 		[mzList,intensityMatrix] = imputeMissing(mzList,intensityMatrix,parameters);
 	end
 end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
+    failedProcess(handles);
+    return 
+end
 diary off
 commandOutput = fileread(commandFile);
 set(handles.commandWindow,'String',commandOutput);
@@ -135,6 +177,7 @@ set(handles.commandWindow,'String',commandOutput);
 diary on
 processVal = processVal+1;
 updateProcess(processVal,handles);
+try
 if val == 3
     for j = 1:2
         if j == 1 % positive mode
@@ -145,6 +188,19 @@ if val == 3
     end
 else
 	exportFile(mzList,intensityMatrix,FileName);
+end
+catch exception
+    disp(exception.message);
+    if size(exception,1) > 0
+        fprintf('File: %s \n',exception.stack.name);
+        fprintf('Line no.: %d \n',exception.stack.line);
+    end
+    diary off
+    commandOutput = fileread(commandFile);
+    set(handles.commandWindow,'String',commandOutput);
+    delete(commandFile);
+    failedProcess(handles);
+    return     
 end
 diary off
 commandOutput = fileread(commandFile);
