@@ -79,7 +79,6 @@ parameters.minMZ = str2num(get(handles.minMZ,'String'));
 parameters.maxMZ = str2num(get(handles.maxMZ,'String'));
 parameters.threshold = str2num(get(handles.thresholdInt,'String'));
 parameters.tolerance = str2num(get(handles.massTolerance,'String'));
-parameters.name = get(handles.fileName,'String');
 parameters.polarity = get(handles.polaritySelection,'Value');
 parameters.backgroundSpectrum = get(handles.backgroundSpectrum,'String');
 parameters.outputVal = get(handles.outputType,'Value');
